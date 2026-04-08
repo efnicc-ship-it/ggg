@@ -24,6 +24,10 @@ Son güncelleme: 2026-04-08
 
 ## Phase 2 — Müşteri + Servis (Çekirdek) ⏳ SIRADAKI
 
+> **Not:** Diğer oturumda (session_01JipMM9HbSjmA3aZURgHzAS) Application Features ve Web Controllers
+> yazılmaya başlandı ama session limit dolunca commit edilemeden bitti. Repo'ya girmedi.
+> Buradan sıfırdan devam ediliyor.
+
 - ⏳ Customer CRUD + KVKK şifreleme + popup partial
 - ⏳ Device Catalog yönetimi (Type→Brand→Model→Variant AJAX cascading)
 - ⏳ CommonFault + CommonAction listeleri (admin CRUD + hızlı seçim)
