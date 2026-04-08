@@ -1,0 +1,95 @@
+@model TeknikServis.Web.Controllers.LoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Giriş";
+}
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Giriş – TeknikServis ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: { DEFAULT:'#6366f1', 500:'#6366f1', 600:'#4f46e5' } } } } }
+    </script>
+</head>
+<body class="h-full bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+
+        <!-- Logo / brand -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-2xl shadow-primary/40">
+                <span class="text-white font-bold text-2xl">TS</span>
+            </div>
+            <h1 class="text-2xl font-bold text-white">TeknikServis ERP</h1>
+            <p class="text-slate-400 text-sm mt-1">Sisteme giriş yapın</p>
+        </div>
+
+        <!-- Card -->
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+            <form asp-action="Login" asp-controller="Account" method="post">
+                <input type="hidden" name="returnUrl" value="@(ViewData["ReturnUrl"] as string)"/>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-300 text-sm">
+                        @Html.ValidationSummary(false, null, new { @class = "" })
+                    </div>
+                }
+
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="UserName" class="block text-sm font-medium text-slate-300 mb-1.5">Kullanıcı Adı</label>
+                        <input asp-for="UserName"
+                               class="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                               placeholder="kullaniciadi" autocomplete="username" autofocus/>
+                        <span asp-validation-for="UserName" class="text-red-400 text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Password" class="block text-sm font-medium text-slate-300 mb-1.5">Şifre</label>
+                        <div class="relative">
+                            <input asp-for="Password" id="pw-input"
+                                   class="w-full px-4 py-2.5 pr-12 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                   placeholder="••••••••" autocomplete="current-password"/>
+                            <button type="button" onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition">
+                                <svg id="pw-eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-red-400 text-xs mt-1 block"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input asp-for="RememberMe" type="checkbox" class="w-4 h-4 rounded border-white/30 bg-white/10 text-primary focus:ring-primary"/>
+                            <span class="text-sm text-slate-400">Beni hatırla</span>
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-600 text-white font-semibold text-sm transition-colors shadow-lg shadow-primary/30 active:scale-[0.99]">
+                        Giriş Yap
+                    </button>
+                </div>
+
+                @Html.AntiForgeryToken()
+            </form>
+        </div>
+
+        <p class="text-center text-slate-600 text-xs mt-6">
+            TeknikServis ERP &copy; @DateTime.Now.Year — Ensar AI
+        </p>
+    </div>
+
+    <script>
+        function togglePw() {
+            const input = document.getElementById('pw-input');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+    </script>
+</body>
+</html>

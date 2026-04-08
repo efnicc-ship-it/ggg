@@ -1,0 +1,83 @@
+@model IEnumerable<TeknikServis.Domain.Entities.Stock.StockWriteOff>
+
+@{
+    int page = ViewBag.Page ?? 1;
+    int total = ViewBag.TotalCount ?? 0;
+    int totalPages = ViewBag.TotalPages ?? 1;
+}
+
+<div class="flex flex-col gap-5">
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Fire / İsraf Kayıtları</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Toplam <span class="font-medium text-gray-700 dark:text-gray-300">@total</span> fire kaydı</p>
+        </div>
+        <a href="@Url.Action("Parts","Stock")" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">← Parça Stok</a>
+    </div>
+
+    <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/40 rounded-xl p-4 text-sm text-amber-800 dark:text-amber-300">
+        Fire kayıtları, servis sırasında kırılan/kullanılamaz hale gelen parçaları gösterir. Her fire, aynı servis kaydına yeniden sipariş oluşturur ve maliyet birikir.
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-16 text-gray-400 dark:text-gray-500 text-sm">Fire kaydı bulunamadı</div>
+        }
+        else
+        {
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Parça / Ürün</th>
+                        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Adet</th>
+                        <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Maliyet</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Servis Kaydı</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Neden</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tarih</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach (var wo in Model)
+                    {
+                        var itemName = wo.Part?.Name
+                            ?? wo.DeviceAccessory?.Name
+                            ?? wo.DeviceCompanion?.Name
+                            ?? wo.UniversalAccessory?.Name
+                            ?? $"Kayıt #{wo.PartId ?? wo.DeviceAccessoryId ?? wo.DeviceInventoryId}";
+                        <tr class="hover:bg-amber-50/50 dark:hover:bg-amber-900/5 transition-colors">
+                            <td class="px-5 py-3 font-medium text-gray-800 dark:text-gray-200">@itemName</td>
+                            <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-300">@wo.Quantity</td>
+                            <td class="px-4 py-3 text-right text-red-600 dark:text-red-400 font-medium">@wo.TotalCost.ToString("N2") ₺</td>
+                            <td class="px-4 py-3">
+                                @if (wo.LinkedServiceRecordId.HasValue)
+                                {
+                                    <a href="@Url.Action("Detail","Service", new{id=wo.LinkedServiceRecordId})"
+                                       class="text-blue-600 dark:text-blue-400 hover:underline text-xs">Servis #@wo.LinkedServiceRecordId</a>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400 text-xs">—</span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">@(wo.Reason.Length > 0 ? wo.Reason : "—")</td>
+                            <td class="px-4 py-3 text-xs text-gray-400 dark:text-gray-500">@wo.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (totalPages > 1)
+            {
+                <div class="flex justify-end gap-1 px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+                    @for (int p = Math.Max(1, page - 2); p <= Math.Min(totalPages, page + 2); p++)
+                    {
+                        <a href="@Url.Action("WriteOffs","Stock", new{page=p})"
+                           class="px-3 py-1.5 text-sm border rounded-lg @(p == page ? "bg-blue-600 border-blue-600 text-white" : "border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300")">@p</a>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>

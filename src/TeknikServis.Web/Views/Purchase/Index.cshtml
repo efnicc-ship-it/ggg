@@ -1,0 +1,187 @@
+@model TeknikServis.Application.Features.Purchase.Queries.GetPurchaseRecords.GetPurchaseRecordsResult
+@using TeknikServis.Domain.Enums
+
+@{
+    var q = ViewBag.Q as string;
+    var pType = ViewBag.Type as PurchaseType?;
+    int currentPage = Model.Page;
+    int totalPages = Model.TotalPages;
+}
+
+<div class="flex flex-col gap-5">
+
+    
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Alış Kayıtları</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                Toplam <span class="font-medium text-gray-700 dark:text-gray-300">@Model.TotalCount</span> kayıt
+            </p>
+        </div>
+        <a href="@Url.Action("Create", "Purchase")"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Yeni Alış
+        </a>
+    </div>
+
+    
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+        <form method="get" action="@Url.Action("Index","Purchase")" class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+                </svg>
+                <input type="text" name="q" value="@q" placeholder="Alış no, IMEI, müşteri ara..."
+                       class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            </div>
+            <select name="type"
+                    class="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Tüm Tipler</option>
+                <option value="1" selected="@(pType == PurchaseType.Normal ? "selected" : null)">Normal</option>
+                <option value="2" selected="@(pType == PurchaseType.Damaged ? "selected" : null)">Arızalı</option>
+                <option value="3" selected="@(pType == PurchaseType.Scrap ? "selected" : null)">Hurda</option>
+            </select>
+            <button type="submit"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap">
+                Filtrele
+            </button>
+        </form>
+    </div>
+
+    
+    <div class="flex flex-wrap gap-2">
+        <a href="@Url.Action("Index","Purchase", new{q})"
+           class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium @(pType == null ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200") transition-colors">
+            Tümü
+        </a>
+        <a href="@Url.Action("Index","Purchase", new{q, type=1})"
+           class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium @(pType == PurchaseType.Normal ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200") transition-colors">
+            Normal
+        </a>
+        <a href="@Url.Action("Index","Purchase", new{q, type=2})"
+           class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium @(pType == PurchaseType.Damaged ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200") transition-colors">
+            Arızalı
+        </a>
+        <a href="@Url.Action("Index","Purchase", new{q, type=3})"
+           class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium @(pType == PurchaseType.Scrap ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300" : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200") transition-colors">
+            Hurda
+        </a>
+    </div>
+
+    
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        @if (!Model.Items.Any())
+        {
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+                <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <p class="text-gray-500 dark:text-gray-400 font-medium">Kayıt bulunamadı</p>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                        <tr>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Alış No</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Müşteri</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cihaz</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">IMEI</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tip</th>
+                            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Fiyat</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">IMEI Kontrol</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Servis</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="px-4 py-3">
+                                    <span class="font-mono text-xs font-medium text-gray-800 dark:text-gray-200">@item.RecordNumber</span>
+                                </td>
+                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">@item.CustomerName</td>
+                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">@item.DeviceBrand @item.DeviceModel</td>
+                                <td class="px-4 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">@item.Imei1</td>
+                                <td class="px-4 py-3">
+                                    @{
+                                        var (tbg, ttxt, tlabel) = GetTypeBadge(item.PurchaseType);
+                                    }
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium @tbg @ttxt">@tlabel</span>
+                                </td>
+                                <td class="px-4 py-3 text-right font-medium text-gray-800 dark:text-gray-200">
+                                    @item.PurchasePrice.ToString("N2") ₺
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    @if (item.ImeiChecked)
+                                    {
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/40">
+                                            <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/40">
+                                            <svg class="w-3 h-3 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                            </svg>
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    @if (item.AutoCreatedServiceRecordId.HasValue)
+                                    {
+                                        <a href="@Url.Action("Detail","Service", new{id=item.AutoCreatedServiceRecordId})"
+                                           class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Servis</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-gray-300 dark:text-gray-600 text-xs">—</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 text-xs text-gray-400 dark:text-gray-500">@item.CreatedAt.ToString("dd.MM.yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            
+            @if (totalPages > 1)
+            {
+                <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        @((currentPage - 1) * Model.PageSize + 1)–@(Math.Min(currentPage * Model.PageSize, Model.TotalCount)) / @Model.TotalCount
+                    </p>
+                    <div class="flex gap-1">
+                        @for (int p = Math.Max(1, currentPage - 2); p <= Math.Min(totalPages, currentPage + 2); p++)
+                        {
+                            <a href="@Url.Action("Index","Purchase", new{q, type=pType.HasValue?(int?)pType:null, page=p})"
+                               class="px-3 py-1.5 text-sm border rounded-lg transition-colors @(p == currentPage ? "bg-blue-600 border-blue-600 text-white" : "border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300")">
+                                @p
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@functions {
+    static (string bg, string txt, string label) GetTypeBadge(PurchaseType t) => t switch
+    {
+        PurchaseType.Normal  => ("bg-green-100 dark:bg-green-900/40", "text-green-700 dark:text-green-300", "Normal"),
+        PurchaseType.Damaged => ("bg-amber-100 dark:bg-amber-900/40", "text-amber-700 dark:text-amber-300", "Arızalı"),
+        PurchaseType.Scrap   => ("bg-red-100 dark:bg-red-900/40",    "text-red-700 dark:text-red-300",    "Hurda"),
+        _ => ("bg-gray-100 dark:bg-gray-700", "text-gray-600 dark:text-gray-400", t.ToString())
+    };
+}

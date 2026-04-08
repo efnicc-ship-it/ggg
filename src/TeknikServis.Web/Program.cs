@@ -109,6 +109,9 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
     Authorization = new[] { new TeknikServis.Web.Infrastructure.HangfireAuthFilter() }
 });
 
+// Register AI recurring jobs
+TeknikServis.Infrastructure.DependencyInjection.RegisterRecurringJobs();
+
 // Routes
 app.MapControllerRoute(
     name: "areas",

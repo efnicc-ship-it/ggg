@@ -42,6 +42,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, int>, IA
     public DbSet<TenantSettings> TenantSettings => Set<TenantSettings>();
 
     // Identity
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
     public DbSet<UserRoleAssignment> UserRoleAssignments => Set<UserRoleAssignment>();
     public DbSet<CustomRole> CustomRoles => Set<CustomRole>();

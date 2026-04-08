@@ -75,6 +75,39 @@ public static class DependencyInjection
         services.AddHttpClient<ISmsService, SmsService>();
         services.AddHttpClient<IWhatsAppService, WhatsAppService>();
 
+        // Hangfire jobs (transient — Hangfire resolves per execution)
+        services.AddTransient<Jobs.AiRuleEngineJob>();
+
         return services;
+    }
+
+    /// <summary>Register recurring Hangfire jobs. Call from Program.cs after app is built.</summary>
+    public static void RegisterRecurringJobs()
+    {
+        var manager = new RecurringJobManager();
+
+        // Kural 1: Teknisyen 24/48 saat hareketsiz — Her saat
+        manager.AddOrUpdate<Jobs.AiRuleEngineJob>(
+            "ai-idle-technicians",
+            job => job.CheckIdleTechnicians(CancellationToken.None),
+            "0 * * * *");
+
+        // Kural 2: Parça siparişi 4 saat — Her saat
+        manager.AddOrUpdate<Jobs.AiRuleEngineJob>(
+            "ai-unordered-parts",
+            job => job.CheckUnorderedParts(CancellationToken.None),
+            "0 * * * *");
+
+        // Kural 6: Bayi 30 gün ödeme — Pazartesi 09:00
+        manager.AddOrUpdate<Jobs.AiRuleEngineJob>(
+            "ai-dealer-payments",
+            job => job.CheckDealerPayments(CancellationToken.None),
+            "0 9 * * MON");
+
+        // Kural 7: Cihaz 60 gün satılmadı — Her gün 09:00
+        manager.AddOrUpdate<Jobs.AiRuleEngineJob>(
+            "ai-unsold-devices",
+            job => job.CheckUnsoldDevices(CancellationToken.None),
+            "0 9 * * *");
     }
 }

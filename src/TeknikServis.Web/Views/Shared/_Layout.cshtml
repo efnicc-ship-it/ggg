@@ -1,50 +1,268 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TeknikServis.Web</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/TeknikServis.Web.styles.css" asp-append-version="true" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " – " : "")TeknikServis ERP</title>
+
+    <!-- Tailwind CSS CDN (dev) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT:'#6366f1', 50:'#eef2ff', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- SignalR -->
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.0/dist/browser/signalr.min.js"></script>
+
+    @RenderSection("Styles", required: false)
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TeknikServis.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+<body class="h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased"
+      x-data="appShell()"
+      x-init="init()"
+      :class="{ 'dark': darkMode }">
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <!-- SIDEBAR -->
+    <aside :class="sidebarOpen ? 'w-64' : 'w-[70px]'"
+           class="fixed inset-y-0 left-0 z-50 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col shadow-sm hidden lg:flex">
+
+        <!-- Logo -->
+        <div class="h-16 flex items-center justify-center px-4 border-b border-gray-200 dark:border-gray-700 shrink-0 overflow-hidden">
+            <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                    <span class="text-white font-bold text-sm">TS</span>
                 </div>
-            </div>
+                <span x-show="sidebarOpen" class="font-bold text-gray-900 dark:text-white truncate">TeknikServis</span>
+            </a>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
+            @await Html.PartialAsync("_SidebarNav")
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+        <!-- Bottom: user + collapse -->
+        <div class="border-t border-gray-200 dark:border-gray-700 p-3 shrink-0 space-y-2">
+            <div x-show="sidebarOpen" class="flex items-center gap-2 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                    @(User.Identity?.Name?.Substring(0,1).ToUpperInvariant() ?? "U")
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate">@User.Identity?.Name</p>
+                    <p class="text-xs text-gray-500 truncate">@User.FindFirst("Role")?.Value</p>
+                </div>
+                <a asp-controller="Account" asp-action="Logout" title="Çıkış"
+                   class="text-gray-400 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </a>
+            </div>
+            <button @@click="sidebarOpen = !sidebarOpen; localStorage.setItem('sidebarOpen', sidebarOpen)"
+                    class="w-full p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                <svg :class="sidebarOpen ? '' : 'rotate-180'" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                </svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Mobile sidebar overlay -->
+    <div x-show="mobileSidebarOpen" @@click="mobileSidebarOpen = false"
+         class="fixed inset-0 z-40 bg-black/50 lg:hidden" x-transition></div>
+
+    <!-- Mobile sidebar -->
+    <aside :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+           class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 flex flex-col lg:hidden">
+        <div class="h-16 flex items-center px-4 border-b border-gray-200 dark:border-gray-700 justify-between">
+            <span class="font-bold text-gray-900 dark:text-white">TeknikServis</span>
+            <button @@click="mobileSidebarOpen = false" class="text-gray-500 p-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
+            @await Html.PartialAsync("_SidebarNav")
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div :class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-[70px]'" class="flex flex-col min-h-screen transition-all duration-300">
+
+        <!-- Top Header -->
+        <header class="sticky top-0 z-30 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 gap-3 shadow-sm">
+            <!-- Mobile menu button -->
+            <button @@click="mobileSidebarOpen = true" class="lg:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+
+            <!-- Page title / breadcrumb -->
+            <div class="flex-1">
+                <h1 class="text-base font-semibold text-gray-800 dark:text-gray-200">@(ViewData["PageTitle"] ?? ViewData["Title"] ?? "")</h1>
+                @if (ViewData["Breadcrumb"] != null)
+                {
+                    <p class="text-xs text-gray-500">@ViewData["Breadcrumb"]</p>
+                }
+            </div>
+
+            <!-- Quick actions: barcode, new service, dark mode, notifications -->
+            <div class="flex items-center gap-1">
+
+                <!-- Quick new service -->
+                <a asp-controller="Service" asp-action="Create"
+                   class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Servis</span>
+                </a>
+
+                <!-- Dark mode -->
+                <button @@click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)"
+                        class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Tema">
+                    <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                    <svg x-show="darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+
+                <!-- Notifications -->
+                <div x-data="{ open: false }" class="relative">
+                    <button @@click="open = !open"
+                            class="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        <span id="notif-badge" class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">0</span>
+                    </button>
+                    <div x-show="open" @@click.outside="open = false"
+                         class="absolute right-0 top-12 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+                        <div class="p-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                            <span class="font-semibold text-sm">Bildirimler</span>
+                            <button class="text-xs text-primary hover:underline" id="notif-clear-all">Tümünü oku</button>
+                        </div>
+                        <div id="notif-list" class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
+                            <p class="text-sm text-gray-400 p-4 text-center">Bildirim yok</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internal chat -->
+                <a asp-controller="Chat" asp-action="Index"
+                   class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Mesajlar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                </a>
+            </div>
+        </header>
+
+        <!-- Content area -->
+        <main class="flex-1 p-4 md:p-6">
+            @if (TempData["Success"] != null)
+            {
+                <div class="mb-4 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    @TempData["Success"]
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    @TempData["Error"]
+                </div>
+            }
+
             @RenderBody()
         </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - TeknikServis.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <!-- Footer -->
+        <footer class="py-3 px-6 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-400 text-center">
+            TeknikServis ERP &copy; @DateTime.Now.Year — Ensar AI aktif
+        </footer>
+    </div>
+}
+else
+{
+    @RenderBody()
+}
+
+<!-- Toast container -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
+@RenderSection("Scripts", required: false)
+
+<script>
+function appShell() {
+    return {
+        sidebarOpen: localStorage.getItem('sidebarOpen') !== 'false',
+        mobileSidebarOpen: false,
+        darkMode: localStorage.getItem('darkMode') === 'true',
+        init() {
+            document.documentElement.classList.toggle('dark', this.darkMode);
+        }
+    };
+}
+
+// Toast helper
+window.showToast = function(title, message, type = 'info') {
+    const colorMap = {
+        info: 'bg-blue-500', success: 'bg-emerald-500',
+        warning: 'bg-amber-500', error: 'bg-red-500', critical: 'bg-rose-600'
+    };
+    const el = document.createElement('div');
+    el.className = `pointer-events-auto w-full ${colorMap[type] || colorMap.info} text-white rounded-xl shadow-lg px-4 py-3 flex items-start gap-3 animate-in slide-in-from-bottom duration-300`;
+    el.innerHTML = `
+        <div class="flex-1">
+            <p class="font-semibold text-sm">${title}</p>
+            ${message ? `<p class="text-xs opacity-90 mt-0.5">${message}</p>` : ''}
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+        <button onclick="this.closest('div').remove()" class="text-white/70 hover:text-white text-lg leading-none font-bold mt-0.5">&times;</button>`;
+    const container = document.getElementById('toast-container');
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+};
+
+// SignalR - notifications
+(async function() {
+    try {
+        const conn = new signalR.HubConnectionBuilder()
+            .withUrl('/hubs/notifications')
+            .withAutomaticReconnect([0, 2000, 5000, 10000])
+            .build();
+
+        conn.on('ReceiveNotification', (title, message, severity) => {
+            showToast(title, message, severity?.toLowerCase() || 'info');
+            const badge = document.getElementById('notif-badge');
+            if (badge) {
+                const n = (parseInt(badge.textContent) || 0) + 1;
+                badge.textContent = n;
+                badge.classList.remove('hidden');
+            }
+        });
+
+        await conn.start();
+        await conn.invoke('JoinUserGroup');
+    } catch(e) { /* not logged in or hub not available */ }
+})();
+</script>
 </body>
 </html>

@@ -31,6 +31,7 @@ public interface IApplicationDbContext
     DbSet<TenantSettings> TenantSettings { get; }
 
     // Identity
+    DbSet<AppUser> AppUsers { get; }
     DbSet<UserPermission> UserPermissions { get; }
     DbSet<UserRoleAssignment> UserRoleAssignments { get; }
     DbSet<CustomRole> CustomRoles { get; }

@@ -1,0 +1,140 @@
+@{
+    ViewData["Title"] = "Yeni Müşteri";
+    string? returnUrl = ViewBag.ReturnUrl as string;
+}
+
+<div class="max-w-2xl mx-auto flex flex-col gap-5">
+
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Index","Customer")" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Yeni Müşteri</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">TC Kimlik bilgileri KVKK kapsamında şifreli saklanır</p>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action("Create","Customer")">
+        @Html.AntiForgeryToken()
+        @if (!string.IsNullOrEmpty(returnUrl))
+        {
+            <input type="hidden" name="returnUrl" value="@returnUrl"/>
+        }
+
+        {{!-- Kişisel Bilgiler --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Kişisel Bilgiler</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Ad <span class="text-red-500">*</span></label>
+                    <input type="text" name="FirstName" required placeholder="Ad"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Soyad <span class="text-red-500">*</span></label>
+                    <input type="text" name="LastName" required placeholder="Soyad"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Telefon <span class="text-red-500">*</span></label>
+                    <input type="tel" name="Phone" required placeholder="05xx xxx xx xx"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Telefon 2</label>
+                    <input type="tel" name="Phone2" placeholder="Alternatif telefon"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">E-posta</label>
+                    <input type="email" name="Email" placeholder="ornek@mail.com"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Şehir</label>
+                    <input type="text" name="City" placeholder="İstanbul"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Adres</label>
+                    <textarea name="Address" rows="2"
+                              class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        {{!-- KVKK Bilgileri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-1">KVKK Bilgileri</h2>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">Bu bilgiler AES-256 şifrelenerek saklanır. Yalnızca yetkili personel görebilir.</p>
+            <div>
+                <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">TC Kimlik Numarası</label>
+                <div class="relative max-w-xs">
+                    <input type="password" name="NationalId" id="nationalId" maxlength="11" placeholder="11 haneli TC Kimlik"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 font-mono"/>
+                    <button type="button" onclick="toggleNationalId()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{!-- İletişim Tercihleri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">İletişim Tercihleri</h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Tercih Edilen Kanal</label>
+                    <select name="CommunicationPreference"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="0">SMS</option>
+                        <option value="1">WhatsApp</option>
+                        <option value="2">E-posta</option>
+                        <option value="3">Arama</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-2 pt-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="SmsOptOut" value="true" class="w-4 h-4 rounded border-gray-300 text-blue-600"/>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">SMS almak istemiyorum</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="WhatsAppOptOut" value="true" class="w-4 h-4 rounded border-gray-300 text-blue-600"/>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">WhatsApp mesajı almak istemiyorum</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="EmailOptOut" value="true" class="w-4 h-4 rounded border-gray-300 text-blue-600"/>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">E-posta almak istemiyorum</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-3 justify-end">
+            <a href="@Url.Action("Index","Customer")"
+               class="px-5 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                İptal
+            </a>
+            <button type="submit"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Kaydet
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleNationalId() {
+            const input = document.getElementById('nationalId');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+    </script>
+}
