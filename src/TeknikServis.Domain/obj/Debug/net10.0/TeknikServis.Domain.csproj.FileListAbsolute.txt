@@ -1,0 +1,11 @@
+/home/user/ggg/src/TeknikServis.Domain/obj/Debug/net10.0/TeknikServis.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/home/user/ggg/src/TeknikServis.Domain/obj/Debug/net10.0/TeknikServis.Domain.AssemblyInfoInputs.cache
+/home/user/ggg/src/TeknikServis.Domain/obj/Debug/net10.0/TeknikServis.Domain.AssemblyInfo.cs
+/home/user/ggg/src/TeknikServis.Domain/obj/Debug/net10.0/TeknikServis.Domain.csproj.CoreCompileInputs.cache
+/home/user/ggg/src/TeknikServis.Domain/bin/Debug/net10.0/TeknikServis.Domain.deps.json
+/home/user/ggg/src/TeknikServis.Domain/bin/Debug/net10.0/TeknikServis.Domain.dll
+/home/user/ggg/src/TeknikServis.Domain/bin/Debug/net10.0/TeknikServis.Domain.pdb
+/home/user/ggg/src/TeknikServis.Domain/obj/Debug/net10.0/TeknikServis.Domain.dll
+/home/user/ggg/src/TeknikServis.Domain/obj/Debug/net10.0/refint/TeknikServis.Domain.dll
+/home/user/ggg/src/TeknikServis.Domain/obj/Debug/net10.0/TeknikServis.Domain.pdb
+/home/user/ggg/src/TeknikServis.Domain/obj/Debug/net10.0/ref/TeknikServis.Domain.dll

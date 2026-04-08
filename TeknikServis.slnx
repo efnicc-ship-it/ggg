@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TeknikServis.Api/TeknikServis.Api.csproj" />
+    <Project Path="src/TeknikServis.Application/TeknikServis.Application.csproj" />
+    <Project Path="src/TeknikServis.Domain/TeknikServis.Domain.csproj" />
+    <Project Path="src/TeknikServis.Infrastructure/TeknikServis.Infrastructure.csproj" />
+    <Project Path="src/TeknikServis.Web/TeknikServis.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TeknikServis.Application.Tests/TeknikServis.Application.Tests.csproj" />
+    <Project Path="tests/TeknikServis.Domain.Tests/TeknikServis.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
