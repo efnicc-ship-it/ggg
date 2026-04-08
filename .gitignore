@@ -1,0 +1,28 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+
+## Environment / Secrets
+appsettings.Development.json
+*.env
+.env*
+
+## EF Core
+# Keep migrations but not DB files
+*.db
+*.db-wal
+*.db-shm
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Uploads
+wwwroot/uploads/
+
+## Logs
+logs/
