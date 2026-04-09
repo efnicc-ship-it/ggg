@@ -85,6 +85,10 @@
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium @pbg @ptxt">@plabel</span>
                                 </td>
                                 <td class="px-4 py-3 text-xs text-gray-400 dark:text-gray-500">@sale.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td class="px-4 py-3 text-right">
+                                    <a href="@Url.Action("Detail","Sale",new{id=sale.Id})"
+                                       class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Detay</a>
+                                </td>
                             </tr>
                         }
                     </tbody>

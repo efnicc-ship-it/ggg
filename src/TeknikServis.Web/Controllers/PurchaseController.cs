@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TeknikServis.Application.Common.Interfaces;
 using TeknikServis.Application.Features.Purchase.Commands.CreatePurchase;
 using TeknikServis.Application.Features.Purchase.Queries.GetPurchaseRecords;
 using TeknikServis.Domain.Enums;
@@ -11,10 +13,27 @@ namespace TeknikServis.Web.Controllers;
 public class PurchaseController : Controller
 {
     private readonly IMediator _mediator;
+    private readonly IApplicationDbContext _db;
 
-    public PurchaseController(IMediator mediator)
+    public PurchaseController(IMediator mediator, IApplicationDbContext db)
     {
         _mediator = mediator;
+        _db = db;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Detail(int id)
+    {
+        var record = await _db.PurchaseRecords
+            .Include(p => p.Customer)
+            .Include(p => p.DeviceModel).ThenInclude(m => m.Brand)
+            .Include(p => p.DeviceModelVariant)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (record == null) return NotFound();
+
+        ViewData["Title"] = $"Alış {record.RecordNumber}";
+        return View(record);
     }
 
     [HttpGet]

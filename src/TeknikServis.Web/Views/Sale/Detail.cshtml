@@ -1,0 +1,130 @@
+@using TeknikServis.Domain.Enums
+@model TeknikServis.Domain.Entities.Sale.SaleRecord
+
+@{
+    var payLabel = Model.PaymentStatus switch {
+        PaymentStatus.Paid            => "Ödendi",
+        PaymentStatus.PartiallyPaid   => "Kısmi Ödeme",
+        PaymentStatus.Unpaid          => "Ödenmedi",
+        PaymentStatus.Deferred        => "Vadeli",
+        _ => Model.PaymentStatus.ToString()
+    };
+    var payColor = Model.PaymentStatus switch {
+        PaymentStatus.Paid          => "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+        PaymentStatus.PartiallyPaid => "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+        _ => "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+    };
+    ViewData["Title"] = $"Satış {Model.RecordNumber}";
+}
+
+<div class="max-w-3xl mx-auto flex flex-col gap-5">
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Index")" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <div class="flex-1">
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">@Model.RecordNumber</h1>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium @payColor">@payLabel</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                @if (Model.IsAccessorySaleOnly)
+                {
+                    <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">Aksesuar</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    {{-- Müşteri --}}
+    @if (Model.Customer != null)
+    {
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Müşteri</h2>
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="font-medium text-gray-900 dark:text-white">@Model.Customer.FirstName @Model.Customer.LastName</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">@Model.Customer.Phone</p>
+                </div>
+                <a href="@Url.Action("Detail", "Customer", new { id = Model.CustomerId })"
+                   class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Profili Gör</a>
+            </div>
+        </div>
+    }
+
+    {{-- Kalemler --}}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Satış Kalemleri</h2>
+        </div>
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Ürün / Açıklama</th>
+                    <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400">Adet</th>
+                    <th class="px-4 py-3 text-right font-medium text-gray-500 dark:text-gray-400">Birim Fiyat</th>
+                    <th class="px-4 py-3 text-right font-medium text-gray-500 dark:text-gray-400">Toplam</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="px-4 py-3 text-gray-900 dark:text-white">@(item.Description ?? "—")</td>
+                        <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-300">@item.Quantity</td>
+                        <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-300">@item.UnitPrice.ToString("N2") ₺</td>
+                        <td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">@((item.Quantity * item.UnitPrice).ToString("N2")) ₺</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="border-t border-gray-200 dark:border-gray-700">
+                @if (Model.DiscountAmount > 0)
+                {
+                    <tr>
+                        <td colspan="3" class="px-4 py-2 text-right text-sm text-gray-500 dark:text-gray-400">İndirim</td>
+                        <td class="px-4 py-2 text-right text-sm text-red-600 dark:text-red-400">-@Model.DiscountAmount.ToString("N2") ₺</td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="3" class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Genel Toplam</td>
+                    <td class="px-4 py-3 text-right font-bold text-gray-900 dark:text-white text-base">@Model.TotalAmount.ToString("N2") ₺</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    {{-- Ödeme & Garanti --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Ödeme</h2>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium @payColor">@payLabel</span>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+                Toplam: <span class="font-semibold text-gray-900 dark:text-white">@Model.TotalAmount.ToString("N2") ₺</span>
+            </p>
+        </div>
+
+        @if (Model.WarrantyExpiresAt.HasValue)
+        {
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Garanti</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    Bitiş: <span class="font-semibold text-gray-900 dark:text-white">@Model.WarrantyExpiresAt.Value.ToString("dd.MM.yyyy")</span>
+                </p>
+                @{
+                    var daysLeft = (Model.WarrantyExpiresAt.Value - DateTime.UtcNow).Days;
+                }
+                @if (daysLeft > 0)
+                {
+                    <p class="text-xs text-green-600 dark:text-green-400 mt-1">@daysLeft gün kaldı</p>
+                }
+                else
+                {
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1">Garanti süresi doldu</p>
+                }
+            </div>
+        }
+    </div>
+</div>

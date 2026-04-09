@@ -1,0 +1,133 @@
+@using TeknikServis.Domain.Enums
+@model TeknikServis.Domain.Entities.Purchase.PurchaseRecord
+
+@{
+    ViewData["Title"] = $"Alış {Model.RecordNumber}";
+    var typeLabel = Model.PurchaseType switch {
+        PurchaseType.Normal  => "Normal",
+        PurchaseType.Damaged => "Hasarlı",
+        PurchaseType.Scrap   => "Hurda",
+        _ => Model.PurchaseType.ToString()
+    };
+    var typeColor = Model.PurchaseType switch {
+        PurchaseType.Normal  => "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+        PurchaseType.Damaged => "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+        PurchaseType.Scrap   => "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+        _ => "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+    };
+}
+
+<div class="max-w-3xl mx-auto flex flex-col gap-5">
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Index")" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <div class="flex-1">
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">@Model.RecordNumber</h1>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium @typeColor">@typeLabel Alış</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- Satıcı (Müşteri) --}}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Satıcı</h2>
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="font-medium text-gray-900 dark:text-white">@Model.Customer.FirstName @Model.Customer.LastName</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">@Model.Customer.Phone</p>
+            </div>
+            <a href="@Url.Action("Detail", "Customer", new { id = Model.CustomerId })"
+               class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Profili Gör</a>
+        </div>
+    </div>
+
+    {{-- Cihaz Bilgileri --}}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Cihaz</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Marka / Model</p>
+                <p class="font-medium text-gray-900 dark:text-white mt-0.5">
+                    @Model.DeviceModel.Brand?.Name @Model.DeviceModel.Name
+                    @if (Model.DeviceModelVariant != null)
+                    {
+                        <span class="text-gray-500 dark:text-gray-400 font-normal">(@Model.DeviceModelVariant.VariantName)</span>
+                    }
+                </p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">IMEI 1</p>
+                <p class="font-mono text-gray-900 dark:text-white mt-0.5">@Model.Imei1</p>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Imei2))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">IMEI 2</p>
+                    <p class="font-mono text-gray-900 dark:text-white mt-0.5">@Model.Imei2</p>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Ram))
+            {
+                <div><p class="text-xs text-gray-500 dark:text-gray-400">RAM</p><p class="mt-0.5 text-gray-900 dark:text-white">@Model.Ram</p></div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Storage))
+            {
+                <div><p class="text-xs text-gray-500 dark:text-gray-400">Depolama</p><p class="mt-0.5 text-gray-900 dark:text-white">@Model.Storage</p></div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Color))
+            {
+                <div><p class="text-xs text-gray-500 dark:text-gray-400">Renk</p><p class="mt-0.5 text-gray-900 dark:text-white">@Model.Color</p></div>
+            }
+            @if (Model.BatteryHealth.HasValue)
+            {
+                <div><p class="text-xs text-gray-500 dark:text-gray-400">Pil Sağlığı</p><p class="mt-0.5 text-gray-900 dark:text-white">%@Model.BatteryHealth</p></div>
+            }
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">IMEI Kontrol</p>
+                <p class="mt-0.5 @(Model.ImeiChecked ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400")">
+                    @(Model.ImeiChecked ? $"Kontrol edildi ({Model.ImeiCheckDate?.ToString("dd.MM.yyyy")})" : "Kontrol edilmedi")
+                </p>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.PhysicalConditionNotes))
+        {
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Fiziksel Durum</p>
+                <p class="text-sm text-gray-700 dark:text-gray-300">@Model.PhysicalConditionNotes</p>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.RepairDescription))
+        {
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Onarım Açıklaması</p>
+                <p class="text-sm text-gray-700 dark:text-gray-300">@Model.RepairDescription</p>
+            </div>
+        }
+    </div>
+
+    {{-- Fiyat --}}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Alış Fiyatı</h2>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">@Model.PurchasePrice.ToString("N2") ₺</p>
+    </div>
+
+    {{-- Bağlantılı Servis --}}
+    @if (Model.LinkedServiceRecordId.HasValue)
+    {
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 flex items-center gap-3">
+            <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <p class="text-sm text-amber-800 dark:text-amber-300 flex-1">
+                Bu hasarlı alış için otomatik servis kaydı açıldı.
+            </p>
+            <a href="@Url.Action("Detail", "Service", new { id = Model.LinkedServiceRecordId })"
+               class="text-sm font-medium text-amber-700 dark:text-amber-300 hover:underline whitespace-nowrap">Servisi Gör</a>
+        </div>
+    }
+</div>

@@ -51,6 +51,20 @@ public class SaleController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Detail(int id)
+    {
+        var sale = await _db.SaleRecords
+            .Include(s => s.Customer)
+            .Include(s => s.Items)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (sale == null) return NotFound();
+
+        ViewData["Title"] = $"Satış {sale.RecordNumber}";
+        return View(sale);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> ScrapSales(int page = 1, int pageSize = 25)
     {
         var items = await _db.ScrapSaleRecords
