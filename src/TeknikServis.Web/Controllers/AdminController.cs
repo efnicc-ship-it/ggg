@@ -20,6 +20,9 @@ public class AdminController : Controller
         _user = user;
     }
 
+    [HttpGet]
+    public IActionResult Index() => View();
+
     // Kullanıcılar
     [HttpGet]
     public async Task<IActionResult> Users()

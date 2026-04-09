@@ -24,7 +24,7 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var claim = User?.FindFirstValue("tenant_id");
+            var claim = User?.FindFirstValue("TenantId");
             return Guid.TryParse(claim, out var tenantId) ? tenantId : Guid.Empty;
         }
     }
@@ -33,7 +33,7 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var claim = User?.FindFirstValue("branch_id");
+            var claim = User?.FindFirstValue("BranchId");
             return int.TryParse(claim, out var id) ? id : null;
         }
     }
@@ -42,7 +42,7 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var claim = User?.FindFirstValue("region_id");
+            var claim = User?.FindFirstValue("RegionId");
             return int.TryParse(claim, out var id) ? id : null;
         }
     }
