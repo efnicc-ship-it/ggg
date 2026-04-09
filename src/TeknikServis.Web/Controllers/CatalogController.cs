@@ -270,4 +270,86 @@ public class CatalogController : Controller
 
         return Json(parts);
     }
+
+    // GET: /catalog/ajax/faults — Yaygın arıza tipleri
+    [HttpGet("/catalog/ajax/faults")]
+    public async Task<IActionResult> AjaxFaults(string? q)
+    {
+        var query = _db.CommonFaultTypes.Where(f => f.IsActive);
+        if (!string.IsNullOrWhiteSpace(q))
+            query = query.Where(f => f.Name.Contains(q));
+
+        var faults = await query
+            .OrderBy(f => f.SortOrder).ThenBy(f => f.Name)
+            .Take(20)
+            .Select(f => new { f.Id, f.Name })
+            .ToListAsync();
+
+        return Json(faults);
+    }
+
+    // GET: /catalog/ajax/actions — Yaygın işlem tipleri
+    [HttpGet("/catalog/ajax/actions")]
+    public async Task<IActionResult> AjaxActions(string? q)
+    {
+        var query = _db.CommonActionTypes.Where(a => a.IsActive);
+        if (!string.IsNullOrWhiteSpace(q))
+            query = query.Where(a => a.Name.Contains(q));
+
+        var actions = await query
+            .OrderBy(a => a.SortOrder).ThenBy(a => a.Name)
+            .Take(20)
+            .Select(a => new { a.Id, a.Name })
+            .ToListAsync();
+
+        return Json(actions);
+    }
+
+    // ─── CommonFault / CommonAction Admin ────────────────────────────────────
+
+    [HttpGet]
+    public async Task<IActionResult> Faults()
+    {
+        ViewData["Title"] = "Yaygın Arızalar";
+        var faults = await _db.CommonFaultTypes.OrderBy(f => f.SortOrder).ThenBy(f => f.Name).ToListAsync();
+        var actions = await _db.CommonActionTypes.OrderBy(a => a.SortOrder).ThenBy(a => a.Name).ToListAsync();
+        ViewBag.Actions = actions;
+        return View(faults);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateFault(string name, string? description, int sortOrder = 0)
+    {
+        _db.CommonFaultTypes.Add(new Domain.Entities.CommonFault.CommonFaultType
+        { Name = name, Description = description, SortOrder = sortOrder });
+        await _db.SaveChangesAsync();
+        TempData["Success"] = "Arıza tipi eklendi.";
+        return RedirectToAction(nameof(Faults));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleFault(int id)
+    {
+        var f = await _db.CommonFaultTypes.FindAsync(id);
+        if (f != null) { f.IsActive = !f.IsActive; await _db.SaveChangesAsync(); }
+        return RedirectToAction(nameof(Faults));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateAction(string name, string? description, int sortOrder = 0)
+    {
+        _db.CommonActionTypes.Add(new Domain.Entities.CommonFault.CommonActionType
+        { Name = name, Description = description, SortOrder = sortOrder });
+        await _db.SaveChangesAsync();
+        TempData["Success"] = "İşlem tipi eklendi.";
+        return RedirectToAction(nameof(Faults));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleAction(int id)
+    {
+        var a = await _db.CommonActionTypes.FindAsync(id);
+        if (a != null) { a.IsActive = !a.IsActive; await _db.SaveChangesAsync(); }
+        return RedirectToAction(nameof(Faults));
+    }
 }

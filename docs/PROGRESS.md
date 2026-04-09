@@ -34,9 +34,22 @@ Son güncelleme: 2026-04-09
   - ✅ SmartReminderJob (hareketsiz servis + anket, saatlik/2 saatlik)
   - ✅ AiRuleEngineJob (teknisyen/parça/bayi/cihaz kuralları, kayıtlı)
 - ✅ ServiceRecord.SurveySent alanı + migration (20260409070000)
-- ⏳ Device Catalog yönetimi (Type→Brand→Model→Variant Admin CRUD)
-- ⏳ CommonFault + CommonAction listeleri (admin CRUD + hızlı seçim)
-- ⏳ ServiceRecord CRUD + durum makinesi (tam akış)
+- ✅ CurrentUserService (ICurrentUserService implementasyonu)
+- ✅ NotificationService (INotificationService → SMS/WA dispatch)
+- ✅ ServiceRecord CQRS: CreateServiceRecord, UpdateServiceStatus, AddServicePart
+- ✅ ServiceRecord queries: GetServiceRecords, GetServiceRecordDetail
+- ✅ ServiceController: tam CRUD + durum makinesi + bayi akışı
+- ✅ Service views: Index, Create, Detail, PublicQuery, PublicApproved, DealerIncoming, DealerPool
+- ✅ Device Catalog Admin CRUD (Type/Brand/Model/Variant + AJAX)
+- ✅ DeviceInventoryController + Index/Detail views
+- ✅ AiAlertController + Index view (resolve/resolve-all)
+- ✅ AppointmentController + Index view
+- ✅ ReportController + Index view (aylık KPI özeti)
+- ✅ AdminController.Index + Admin hub view
+- ✅ StockController.Index redirect
+- ✅ Dashboard AI alert linki düzeltildi
+- ⏳ CommonFault + CommonAction listeleri (admin CRUD)
+- ⏳ IMEI kara liste kontrolü (servis açılırken alert)
 - ⏳ IMEI bazlı geçmiş kontrolü + kara liste kontrolü
 - ⏳ Termal etiket (ZPL) + QR + 9 nokta alan
 - ⏳ SMS + WhatsApp + Email bildirim akışı

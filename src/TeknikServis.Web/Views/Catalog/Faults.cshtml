@@ -1,0 +1,81 @@
+@model IEnumerable<TeknikServis.Domain.Entities.CommonFault.CommonFaultType>
+
+<div class="flex flex-col gap-6">
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Index")" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Yaygın Arıza & İşlem Tipleri</h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {{-- Arıza Tipleri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Arıza Tipleri</h2>
+            </div>
+
+            {{-- Ekle --}}
+            <form method="post" action="@Url.Action("CreateFault")" class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex gap-2">
+                @Html.AntiForgeryToken()
+                <input type="text" name="name" placeholder="Arıza adı (örn. Ekran Kırık)" required
+                       class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"/>
+                <button type="submit" class="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Ekle</button>
+            </form>
+
+            <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+                @foreach (var f in Model)
+                {
+                    <li class="flex items-center justify-between px-5 py-3">
+                        <span class="text-sm @(f.IsActive ? "text-gray-900 dark:text-white" : "text-gray-400 line-through")">@f.Name</span>
+                        <form method="post" action="@Url.Action("ToggleFault", new { id = f.Id })">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="text-xs @(f.IsActive ? "text-amber-600 hover:text-amber-700" : "text-green-600 hover:text-green-700")">
+                                @(f.IsActive ? "Devre Dışı" : "Etkinleştir")
+                            </button>
+                        </form>
+                    </li>
+                }
+                @if (!Model.Any())
+                {
+                    <li class="px-5 py-8 text-center text-sm text-gray-400">Henüz arıza tipi eklenmemiş.</li>
+                }
+            </ul>
+        </div>
+
+        {{-- İşlem Tipleri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">İşlem Tipleri</h2>
+            </div>
+
+            <form method="post" action="@Url.Action("CreateAction")" class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex gap-2">
+                @Html.AntiForgeryToken()
+                <input type="text" name="name" placeholder="İşlem adı (örn. Ekran Değişimi)" required
+                       class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"/>
+                <button type="submit" class="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Ekle</button>
+            </form>
+
+            <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+                @foreach (var a in (IEnumerable<TeknikServis.Domain.Entities.CommonFault.CommonActionType>)ViewBag.Actions)
+                {
+                    <li class="flex items-center justify-between px-5 py-3">
+                        <span class="text-sm @(a.IsActive ? "text-gray-900 dark:text-white" : "text-gray-400 line-through")">@a.Name</span>
+                        <form method="post" action="@Url.Action("ToggleAction", new { id = a.Id })">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="text-xs @(a.IsActive ? "text-amber-600 hover:text-amber-700" : "text-green-600 hover:text-green-700")">
+                                @(a.IsActive ? "Devre Dışı" : "Etkinleştir")
+                            </button>
+                        </form>
+                    </li>
+                }
+                @if (((IEnumerable<TeknikServis.Domain.Entities.CommonFault.CommonActionType>)ViewBag.Actions).Count() == 0)
+                {
+                    <li class="px-5 py-8 text-center text-sm text-gray-400">Henüz işlem tipi eklenmemiş.</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
