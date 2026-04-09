@@ -1,0 +1,269 @@
+@{
+    ViewData["Title"] = "Yeni Alış Kaydı";
+}
+
+<div class="max-w-3xl mx-auto flex flex-col gap-5">
+
+    {{!-- Header --}}
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Index","Purchase")" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Yeni Alış Kaydı</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">İkinci el cihaz alışı</p>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action("Create","Purchase")" x-data="purchaseForm()">
+        @Html.AntiForgeryToken()
+
+        {{!-- Alış Tipi --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Alış Tipi</h2>
+            <div class="grid grid-cols-3 gap-3">
+                <label class="relative cursor-pointer">
+                    <input type="radio" name="PurchaseType" value="1" x-model="purchaseType" class="peer sr-only" checked/>
+                    <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-900/20 transition-all">
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Normal</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Çalışan cihaz</p>
+                    </div>
+                </label>
+                <label class="relative cursor-pointer">
+                    <input type="radio" name="PurchaseType" value="2" x-model="purchaseType" class="peer sr-only"/>
+                    <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-amber-500 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/20 transition-all">
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Arızalı</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Otomatik servis açılır</p>
+                    </div>
+                </label>
+                <label class="relative cursor-pointer">
+                    <input type="radio" name="PurchaseType" value="3" x-model="purchaseType" class="peer sr-only"/>
+                    <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 transition-all">
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Hurda</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Parça için</p>
+                    </div>
+                </label>
+            </div>
+
+            {{!-- Arızalı bilgi bannerı --}}
+            <div x-show="purchaseType == '2'" x-cloak
+                 class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700/40 text-sm text-amber-800 dark:text-amber-300">
+                Arızalı seçildiğinde kayıt oluşturulur oluşturulmaz otomatik servis kaydı da açılır. Müşteri bilgilerinde firmanızın kendi bilgileri kullanılır.
+            </div>
+        </div>
+
+        {{!-- Müşteri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Satıcı / Müşteri</h2>
+            <div x-data="customerSearch()" class="relative">
+                <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Müşteri <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+                    </svg>
+                    <input type="text" x-model="searchQuery" @@input.debounce.300ms="search"
+                           placeholder="Müşteri adı veya telefon ara..."
+                           class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <input type="hidden" name="CustomerId" x-model="selectedId" required/>
+                <div x-show="results.length > 0" x-cloak
+                     class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <template x-for="c in results" :key="c.id">
+                        <button type="button" @@click="select(c)"
+                                class="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <div class="text-sm font-medium text-gray-800 dark:text-gray-200" x-text="c.name"></div>
+                            <div class="text-xs text-gray-400 dark:text-gray-500" x-text="c.phone"></div>
+                        </button>
+                    </template>
+                </div>
+                <div x-show="selectedId" class="mt-2 flex items-center gap-2 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/40">
+                    <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span class="text-sm text-green-800 dark:text-green-300" x-text="selectedName"></span>
+                    <button type="button" @@click="clear()" class="ml-auto text-green-600 dark:text-green-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{!-- Cihaz Bilgileri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Cihaz Bilgileri</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4" x-data="deviceCascade()">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Cihaz Tipi <span class="text-red-500">*</span></label>
+                    <select name="DeviceTypeId" x-model="typeId" @@change="loadBrands"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Seçiniz...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Marka <span class="text-red-500">*</span></label>
+                    <select name="DeviceBrandId" x-model="brandId" @@change="loadModels" :disabled="!typeId"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                        <option value="">Önce tip seçiniz</option>
+                        <template x-for="b in brands" :key="b.id">
+                            <option :value="b.id" x-text="b.name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Model <span class="text-red-500">*</span></label>
+                    <select name="DeviceModelId" x-model="modelId" @@change="loadVariants" :disabled="!brandId"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                        <option value="">Önce marka seçiniz</option>
+                        <template x-for="m in models" :key="m.id">
+                            <option :value="m.id" x-text="m.name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Varyant</label>
+                    <select name="DeviceModelVariantId" :disabled="variants.length === 0"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                        <option value="">Yok / Genel</option>
+                        <template x-for="v in variants" :key="v.id">
+                            <option :value="v.id" x-text="v.name"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">IMEI 1 <span class="text-red-500">*</span></label>
+                    <input type="text" name="Imei1" required maxlength="15" placeholder="15 haneli IMEI"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">IMEI 2</label>
+                    <input type="text" name="Imei2" maxlength="15" placeholder="Çift SIM ise"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">RAM</label>
+                    <input type="text" name="Ram" placeholder="örn. 8GB"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Depolama</label>
+                    <input type="text" name="Storage" placeholder="örn. 128GB"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Renk</label>
+                    <input type="text" name="Color" placeholder="örn. Siyah"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Batarya Sağlığı (%)</label>
+                    <input type="number" name="BatteryHealth" min="0" max="100" placeholder="örn. 85"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Fiziksel Durum Notları</label>
+                <textarea name="PhysicalConditionNotes" rows="3"
+                          placeholder="Çizik, kırık, hasar durumlarını açıklayın..."
+                          class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+            </div>
+        </div>
+
+        {{!-- Arızalı ek alanlar --}}
+        <div x-show="purchaseType == '2'" x-cloak
+             class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/40 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wide mb-4">Onarım Bilgileri (Arızalı)</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-amber-700 dark:text-amber-400 mb-1.5">İşlem / Arıza Açıklaması</label>
+                    <textarea name="RepairDescription" rows="3"
+                              placeholder="Yapılacak/yapılan işlemi açıklayın..."
+                              class="w-full px-3 py-2 text-sm border border-amber-200 dark:border-amber-700/40 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm text-amber-700 dark:text-amber-400 mb-1.5">Tahmini Onarım Maliyeti (₺)</label>
+                    <input type="number" name="RepairCostEstimate" step="0.01" min="0" placeholder="0.00"
+                           class="w-full px-3 py-2 text-sm border border-amber-200 dark:border-amber-700/40 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"/>
+                </div>
+            </div>
+        </div>
+
+        {{!-- Fiyat --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Alış Fiyatı</h2>
+            <div>
+                <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Ödenen Tutar <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <input type="number" name="PurchasePrice" step="0.01" min="0" required placeholder="0.00"
+                           class="w-full pl-4 pr-12 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₺</span>
+                </div>
+            </div>
+        </div>
+
+        {{!-- Actions --}}
+        <div class="flex gap-3 justify-end">
+            <a href="@Url.Action("Index","Purchase")"
+               class="px-5 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                İptal
+            </a>
+            <button type="submit"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Kayıt Oluştur
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function purchaseForm() {
+            return { purchaseType: '1' };
+        }
+
+        function deviceCascade() {
+            return {
+                typeId: '', brandId: '', modelId: '',
+                brands: [], models: [], variants: [],
+                async loadBrands() {
+                    this.brandId = ''; this.brands = []; this.models = []; this.variants = [];
+                    if (!this.typeId) return;
+                    const res = await fetch(`/api/catalog/brands?typeId=${this.typeId}`);
+                    this.brands = await res.json();
+                },
+                async loadModels() {
+                    this.modelId = ''; this.models = []; this.variants = [];
+                    if (!this.brandId) return;
+                    const res = await fetch(`/api/catalog/models?brandId=${this.brandId}`);
+                    this.models = await res.json();
+                },
+                async loadVariants() {
+                    this.variants = [];
+                    if (!this.modelId) return;
+                    const res = await fetch(`/api/catalog/variants?modelId=${this.modelId}`);
+                    this.variants = await res.json();
+                }
+            };
+        }
+
+        function customerSearch() {
+            return {
+                searchQuery: '', results: [], selectedId: '', selectedName: '',
+                async search() {
+                    if (this.searchQuery.length < 2) { this.results = []; return; }
+                    const res = await fetch(`/api/customers/search?q=${encodeURIComponent(this.searchQuery)}`);
+                    this.results = await res.json();
+                },
+                select(c) { this.selectedId = c.id; this.selectedName = `${c.name} — ${c.phone}`; this.results = []; this.searchQuery = ''; },
+                clear() { this.selectedId = ''; this.selectedName = ''; }
+            };
+        }
+    </script>
+}

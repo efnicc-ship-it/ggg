@@ -1,0 +1,347 @@
+@{
+    ViewData["Title"] = "Yeni Servis Kaydı";
+}
+
+<div class="max-w-3xl mx-auto flex flex-col gap-5">
+
+    {{!-- Header --}}
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Index","Service")" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Yeni Servis Kaydı</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Kayıt numarası otomatik oluşturulacak</p>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action("Create","Service")" x-data="serviceCreateForm()" @@submit.prevent="submitForm">
+        @Html.AntiForgeryToken()
+
+        {{!-- Müşteri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Müşteri Bilgileri</h2>
+            <div class="space-y-4">
+                {{!-- Müşteri arama --}}
+                <div x-data="customerSearch()" class="relative">
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Müşteri <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+                        </svg>
+                        <input type="text" x-model="searchQuery" @@input.debounce.300ms="search"
+                               placeholder="Müşteri adı veya telefon ara..."
+                               class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                    </div>
+                    <input type="hidden" name="CustomerId" x-model="selectedId" required/>
+                    {{!-- Dropdown results --}}
+                    <div x-show="results.length > 0" x-cloak
+                         class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        <template x-for="c in results" :key="c.id">
+                            <button type="button" @@click="select(c)"
+                                    class="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <div class="text-sm font-medium text-gray-800 dark:text-gray-200" x-text="c.name"></div>
+                                <div class="text-xs text-gray-400 dark:text-gray-500" x-text="c.phone"></div>
+                            </button>
+                        </template>
+                    </div>
+                    {{!-- Selected customer display --}}
+                    <div x-show="selectedId" class="mt-2 flex items-center gap-2 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/40">
+                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span class="text-sm text-green-800 dark:text-green-300" x-text="selectedName"></span>
+                        <button type="button" @@click="clear()" class="ml-auto text-green-600 dark:text-green-400 hover:text-green-800">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {{!-- Quick create link --}}
+                    <a href="@Url.Action("Create","Customer", new{returnUrl=Url.Action("Create","Service")})"
+                       class="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Yeni müşteri oluştur
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {{!-- Cihaz Bilgileri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Cihaz Bilgileri</h2>
+
+            {{!-- Cascading dropdowns --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Cihaz Tipi <span class="text-red-500">*</span></label>
+                    <select name="DeviceTypeId" id="deviceTypeId" x-model="deviceTypeId" @@change="loadBrands"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Seçiniz...</option>
+                        @if (ViewBag.DeviceTypes != null)
+                        {
+                            foreach (var dt in (IEnumerable<dynamic>)ViewBag.DeviceTypes)
+                            {
+                                <option value="@dt.Id">@dt.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Marka <span class="text-red-500">*</span></label>
+                    <select name="DeviceBrandId" id="deviceBrandId" x-model="brandId" @@change="loadModels"
+                            :disabled="!deviceTypeId"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                        <option value="">Önce tip seçiniz</option>
+                        <template x-for="b in brands" :key="b.id">
+                            <option :value="b.id" x-text="b.name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Model <span class="text-red-500">*</span></label>
+                    <select name="DeviceModelId" id="deviceModelId" x-model="modelId" @@change="loadVariants"
+                            :disabled="!brandId"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                        <option value="">Önce marka seçiniz</option>
+                        <template x-for="m in models" :key="m.id">
+                            <option :value="m.id" x-text="m.name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Varyant</label>
+                    <select name="DeviceModelVariantId" id="deviceVariantId"
+                            :disabled="variants.length === 0"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                        <option value="">Yok / Genel</option>
+                        <template x-for="v in variants" :key="v.id">
+                            <option :value="v.id" x-text="v.name"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
+            {{!-- Teknik bilgiler --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">IMEI 1</label>
+                    <input type="text" name="Imei1" maxlength="15" placeholder="15 haneli IMEI"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">IMEI 2 <span class="text-xs text-gray-400">(çift SIM)</span></label>
+                    <input type="text" name="Imei2" maxlength="15" placeholder="15 haneli IMEI"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Seri Numarası</label>
+                    <input type="text" name="SerialNumber" placeholder="Seri no"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Renk</label>
+                    <input type="text" name="DeviceColor" placeholder="örn. Siyah, Uzay Grisi"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">
+                        Cihaz Şifresi
+                        <span class="text-xs text-gray-400">(KVKK: AES şifreli saklanır)</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" name="DevicePasswordEncrypted" id="devicePwd" placeholder="PIN veya şifre"
+                               class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 font-mono"/>
+                        <button type="button" onclick="togglePwd()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                            <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{!-- Arıza Bilgileri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Arıza Bilgileri</h2>
+
+            {{!-- Hızlı arıza seçimi --}}
+            @if (ViewBag.CommonFaults != null)
+            {
+                <div class="mb-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Sık Arızalar</p>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach (var fault in (IEnumerable<dynamic>)ViewBag.CommonFaults)
+                        {
+                            <button type="button"
+                                    onclick="appendFault('@fault.Name')"
+                                    class="px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors">
+                                @fault.Name
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Arıza Açıklaması <span class="text-red-500">*</span></label>
+                    <textarea name="FaultDescription" id="faultDesc" rows="4" required
+                              placeholder="Müşterinin bildirdiği arıza detaylarını yazın..."
+                              class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Dahili Not <span class="text-xs text-gray-400">(müşteri göremez)</span></label>
+                    <textarea name="InternalNotes" rows="2"
+                              placeholder="Teknisyen notları..."
+                              class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        {{!-- Servis Ayarları --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Servis Ayarları</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Teknisyen</label>
+                    <select name="AssignedTechnicianId"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Atanmadı</option>
+                        @if (ViewBag.Technicians != null)
+                        {
+                            foreach (var t in (IEnumerable<dynamic>)ViewBag.Technicians)
+                            {
+                                <option value="@t.Id">@t.FullName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1.5">Şube</label>
+                    <select name="BranchId"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        @if (ViewBag.Branches != null)
+                        {
+                            foreach (var b in (IEnumerable<dynamic>)ViewBag.Branches)
+                            {
+                                <option value="@b.Id">@b.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-3">
+                <input type="checkbox" name="IsUnderWarranty" value="true" id="isWarranty"
+                       class="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"/>
+                <label for="isWarranty" class="text-sm text-gray-700 dark:text-gray-300">Garanti kapsamında</label>
+            </div>
+        </div>
+
+        {{!-- Actions --}}
+        <div class="flex gap-3 justify-end">
+            <a href="@Url.Action("Index","Service")"
+               class="px-5 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                İptal
+            </a>
+            <button type="submit"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Kayıt Oluştur
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function serviceCreateForm() {
+            return {
+                deviceTypeId: '',
+                brandId: '',
+                modelId: '',
+                brands: [],
+                models: [],
+                variants: [],
+
+                async loadBrands() {
+                    this.brandId = '';
+                    this.modelId = '';
+                    this.brands = [];
+                    this.models = [];
+                    this.variants = [];
+                    if (!this.deviceTypeId) return;
+                    const res = await fetch(`/api/catalog/brands?typeId=${this.deviceTypeId}`);
+                    this.brands = await res.json();
+                },
+                async loadModels() {
+                    this.modelId = '';
+                    this.models = [];
+                    this.variants = [];
+                    if (!this.brandId) return;
+                    const res = await fetch(`/api/catalog/models?brandId=${this.brandId}`);
+                    this.models = await res.json();
+                },
+                async loadVariants() {
+                    this.variants = [];
+                    if (!this.modelId) return;
+                    const res = await fetch(`/api/catalog/variants?modelId=${this.modelId}`);
+                    this.variants = await res.json();
+                },
+
+                submitForm() {
+                    this.$el.submit();
+                }
+            };
+        }
+
+        function customerSearch() {
+            return {
+                searchQuery: '',
+                results: [],
+                selectedId: '',
+                selectedName: '',
+
+                async search() {
+                    if (this.searchQuery.length < 2) {
+                        this.results = [];
+                        return;
+                    }
+                    const res = await fetch(`/api/customers/search?q=${encodeURIComponent(this.searchQuery)}`);
+                    this.results = await res.json();
+                },
+                select(c) {
+                    this.selectedId = c.id;
+                    this.selectedName = `${c.name} — ${c.phone}`;
+                    this.searchQuery = '';
+                    this.results = [];
+                },
+                clear() {
+                    this.selectedId = '';
+                    this.selectedName = '';
+                }
+            };
+        }
+
+        function appendFault(text) {
+            const ta = document.getElementById('faultDesc');
+            ta.value = ta.value ? ta.value + ', ' + text : text;
+            ta.focus();
+        }
+
+        function togglePwd() {
+            const input = document.getElementById('devicePwd');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+    </script>
+}

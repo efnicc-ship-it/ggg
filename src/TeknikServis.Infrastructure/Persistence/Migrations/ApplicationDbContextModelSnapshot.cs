@@ -548,7 +548,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountValue")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("EndsAt")
                         .HasColumnType("datetime2");
@@ -557,7 +557,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("MinimumPurchaseAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -680,7 +680,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("AverageRating")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("BlacklistReason")
                         .HasColumnType("nvarchar(max)");
@@ -917,6 +917,9 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal?>("AutoApprovalLimit")
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<string>("CompanyName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -932,10 +935,13 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("CreditLimit")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("CurrentBalance")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<bool>("DefaultDealerIsContact")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -956,6 +962,9 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("ShowMaskedStatusOnly")
+                        .HasColumnType("bit");
+
                     b.Property<string>("TaxNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -974,6 +983,64 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Dealers");
+                });
+
+            modelBuilder.Entity("TeknikServis.Domain.Entities.Dealer.DealerBatchShipment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CargoCompany")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CargoTrackingNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("InvoiceCreated")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("InvoiceNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShipmentNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ShippedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("TotalServiceAmount")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DealerId");
+
+                    b.ToTable("DealerBatchShipments");
                 });
 
             modelBuilder.Entity("TeknikServis.Domain.Entities.Dealer.DealerDevice", b =>
@@ -1242,7 +1309,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime>("PurchasedAt")
                         .HasColumnType("datetime2");
@@ -1272,7 +1339,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TargetSalePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
@@ -1675,7 +1742,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("BranchId")
                         .HasColumnType("int");
@@ -1723,10 +1790,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("BalanceAfter")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("BranchId")
                         .HasColumnType("int");
@@ -1803,10 +1870,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("OriginalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("PaidAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("ReferenceId")
                         .HasColumnType("int");
@@ -1816,7 +1883,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("RemainingAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<bool>("ReminderSent")
                         .HasColumnType("bit");
@@ -1873,10 +1940,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("OriginalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("PaidAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("ReferenceId")
                         .HasColumnType("int");
@@ -1886,7 +1953,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("RemainingAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("SettledAt")
                         .HasColumnType("datetime2");
@@ -1934,16 +2001,16 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("OriginalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("PaidAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("PartOrderId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("RemainingAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("SettledAt")
                         .HasColumnType("datetime2");
@@ -2571,13 +2638,13 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("MaxPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal?>("MinPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("StandardPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
@@ -2743,7 +2810,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("PurchaseType")
                         .HasColumnType("int");
@@ -2756,7 +2823,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("RepairCostEstimate")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("RepairDescription")
                         .HasColumnType("nvarchar(max)");
@@ -2796,7 +2863,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("AppliedAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("ApprovedBy")
                         .HasColumnType("int");
@@ -2830,7 +2897,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Value")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.HasKey("Id");
 
@@ -2848,7 +2915,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Channel")
                         .IsRequired()
@@ -2924,14 +2991,14 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("ItemName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("LineTotal")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -2943,7 +3010,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("UniversalAccessoryId")
                         .HasColumnType("int");
@@ -2967,7 +3034,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -3040,7 +3107,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<bool>("IsAccessorySaleOnly")
                         .HasColumnType("bit");
@@ -3065,16 +3132,16 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("TotalPaid")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -3138,13 +3205,13 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("LossAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("OriginalCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("PartId")
                         .HasColumnType("int");
@@ -3157,7 +3224,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
@@ -3309,7 +3376,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("QuotedPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("RespondedAt")
                         .HasColumnType("datetime2");
@@ -3477,10 +3544,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("UnitCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -3509,7 +3576,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -3569,6 +3636,9 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     b.Property<int?>("BranchId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("CargoReceivedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -3578,8 +3648,17 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("DealerBatchShipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DealerCreditHoldAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("DealerId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("DealerIsContactPerson")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -3602,17 +3681,35 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     b.Property<string>("DevicePasswordEncrypted")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("EnteredDealerPoolAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExternalServiceProvider")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExternalServiceReturnedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExternalServiceSentAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FaultDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("FinalPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Imei1")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Imei2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InboundCargoCompany")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InboundCargoTrackingNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InternalNotes")
@@ -3628,16 +3725,16 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("LaborCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<bool>("LiveStreamPlanned")
                         .HasColumnType("bit");
 
                     b.Property<decimal>("NetProfit")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("PartsCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
@@ -3646,7 +3743,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("QuotedPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("RecordNumber")
                         .IsRequired()
@@ -3665,7 +3762,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalPaid")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -3676,6 +3773,8 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("DealerBatchShipmentId");
 
                     b.HasIndex("DeviceModelId");
 
@@ -3817,10 +3916,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Sku")
                         .HasColumnType("nvarchar(max)");
@@ -3899,10 +3998,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Sku")
                         .HasColumnType("nvarchar(max)");
@@ -3957,7 +4056,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("LastPurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("LowStockThreshold")
                         .HasColumnType("int");
@@ -4041,7 +4140,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("AverageCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("BranchId")
                         .HasColumnType("int");
@@ -4137,7 +4236,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("UnitCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -4201,10 +4300,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("UnitCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("UniversalAccessoryId")
                         .HasColumnType("int");
@@ -4282,10 +4381,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Sku")
                         .HasColumnType("nvarchar(max)");
@@ -4353,7 +4452,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -4413,10 +4512,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -4533,7 +4632,7 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -4792,6 +4891,17 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("TeknikServis.Domain.Entities.Dealer.DealerBatchShipment", b =>
+                {
+                    b.HasOne("TeknikServis.Domain.Entities.Dealer.Dealer", "Dealer")
+                        .WithMany("BatchShipments")
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dealer");
                 });
 
             modelBuilder.Entity("TeknikServis.Domain.Entities.Dealer.DealerDevice", b =>
@@ -5225,6 +5335,10 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TeknikServis.Domain.Entities.Dealer.DealerBatchShipment", "DealerBatchShipment")
+                        .WithMany("ServiceRecords")
+                        .HasForeignKey("DealerBatchShipmentId");
+
                     b.HasOne("TeknikServis.Domain.Entities.Device.DeviceModel", "DeviceModel")
                         .WithMany()
                         .HasForeignKey("DeviceModelId")
@@ -5236,6 +5350,8 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
                         .HasForeignKey("DeviceModelVariantId");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("DealerBatchShipment");
 
                     b.Navigation("DeviceModel");
 
@@ -5449,7 +5565,14 @@ namespace TeknikServis.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("TeknikServis.Domain.Entities.Dealer.Dealer", b =>
                 {
+                    b.Navigation("BatchShipments");
+
                     b.Navigation("Devices");
+                });
+
+            modelBuilder.Entity("TeknikServis.Domain.Entities.Dealer.DealerBatchShipment", b =>
+                {
+                    b.Navigation("ServiceRecords");
                 });
 
             modelBuilder.Entity("TeknikServis.Domain.Entities.Device.DeviceBrand", b =>

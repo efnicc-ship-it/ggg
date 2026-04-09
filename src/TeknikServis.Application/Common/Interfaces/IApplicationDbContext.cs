@@ -31,6 +31,7 @@ public interface IApplicationDbContext
     DbSet<TenantSettings> TenantSettings { get; }
 
     // Identity
+    DbSet<AppUser> AppUsers { get; }
     DbSet<UserPermission> UserPermissions { get; }
     DbSet<UserRoleAssignment> UserRoleAssignments { get; }
     DbSet<CustomRole> CustomRoles { get; }
@@ -94,6 +95,7 @@ public interface IApplicationDbContext
     // Dealer
     DbSet<Domain.Entities.Dealer.Dealer> Dealers { get; }
     DbSet<DealerDevice> DealerDevices { get; }
+    DbSet<DealerBatchShipment> DealerBatchShipments { get; }
 
     // Supplier
     DbSet<Domain.Entities.Supplier.Supplier> Suppliers { get; }

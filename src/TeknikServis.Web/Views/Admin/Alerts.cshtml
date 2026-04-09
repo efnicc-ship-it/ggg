@@ -1,0 +1,77 @@
+@model IEnumerable<TeknikServis.Domain.Entities.EnsarAI.AiAlert>
+@using TeknikServis.Domain.Enums
+
+<div class="flex flex-col gap-5">
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">AI Uyarıları</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                <span class="font-medium text-red-600">@Model.Count(a => !a.IsResolved)</span> çözümlenmemiş
+            </p>
+        </div>
+        @if (Model.Any(a => !a.IsResolved))
+        {
+            <form method="post" action="@Url.Action("MarkAllAlertsRead","Admin")">
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    Tümünü Çözümlendi İşaretle
+                </button>
+            </form>
+        }
+    </div>
+
+    <div class="flex flex-col gap-3">
+        @foreach (var alert in Model)
+        {
+            var (borderColor, bgColor, textColor) = GetAlertColors(alert.Severity, alert.IsResolved);
+            <div class="@bgColor @borderColor border rounded-xl p-4 flex items-start gap-3">
+                <div class="@textColor mt-0.5 flex-shrink-0">
+                    @if (alert.Severity >= AlertSeverity.Critical)
+                    {
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    }
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium @textColor">@alert.Message</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">@alert.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                </div>
+                @if (!alert.IsResolved)
+                {
+                    <form method="post" action="@Url.Action("MarkAlertRead","Admin")" class="flex-shrink-0">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@alert.Id"/>
+                        <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Çözümlendi</button>
+                    </form>
+                }
+            </div>
+        }
+        @if (!Model.Any())
+        {
+            <div class="text-center py-12 text-gray-400 dark:text-gray-500 text-sm">Uyarı bulunamadı</div>
+        }
+    </div>
+</div>
+
+@functions {
+    static (string border, string bg, string txt) GetAlertColors(AlertSeverity s, bool resolved)
+    {
+        if (resolved) return ("border-gray-200 dark:border-gray-700", "bg-white dark:bg-gray-800", "text-gray-400 dark:text-gray-500");
+        return s switch
+        {
+            AlertSeverity.Emergency => ("border-red-400 dark:border-red-600", "bg-red-100 dark:bg-red-900/20", "text-red-700 dark:text-red-400"),
+            AlertSeverity.Critical  => ("border-red-300 dark:border-red-700", "bg-red-50 dark:bg-red-900/10", "text-red-600 dark:text-red-400"),
+            AlertSeverity.Warning   => ("border-amber-300 dark:border-amber-700", "bg-amber-50 dark:bg-amber-900/10", "text-amber-600 dark:text-amber-400"),
+            _                       => ("border-blue-200 dark:border-blue-700", "bg-blue-50 dark:bg-blue-900/10", "text-blue-600 dark:text-blue-400")
+        };
+    }
+}
