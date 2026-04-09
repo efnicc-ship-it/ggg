@@ -32,6 +32,15 @@ public class CreateServiceRecordHandler : IRequestHandler<CreateServiceRecordCom
         if (isBlacklisted)
             throw new ForbiddenException("Bu müşteri kara listede. Servis kaydı oluşturulamaz.");
 
+        // IMEI kara liste kontrolü
+        if (!string.IsNullOrWhiteSpace(request.Imei1))
+        {
+            var imeiBlacklisted = await _db.BlacklistedImeis
+                .AnyAsync(b => b.Imei == request.Imei1 && b.IsActive, cancellationToken);
+            if (imeiBlacklisted)
+                throw new ForbiddenException($"IMEI {request.Imei1} kara listede. Yetkili birim bilgilendirildi.");
+        }
+
         // Kayıt no üret: SRV-YYYY-NNNNNN
         var year = DateTime.UtcNow.Year;
         var count = await _db.ServiceRecords
