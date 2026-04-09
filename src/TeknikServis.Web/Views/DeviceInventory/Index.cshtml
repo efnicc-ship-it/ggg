@@ -1,0 +1,121 @@
+@using TeknikServis.Domain.Enums
+@model IEnumerable<TeknikServis.Domain.Entities.Device.DeviceInventory>
+
+<div class="flex flex-col gap-5">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Cihaz Envanteri</h1>
+    </div>
+
+    {{-- Filtre --}}
+    <form method="get" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+        <div class="flex gap-3 flex-wrap">
+            <input type="text" name="q" value="@ViewBag.Q" placeholder="IMEI, marka veya model..."
+                   class="flex-1 min-w-48 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"/>
+            <select name="status" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                <option value="">Tüm Durumlar</option>
+                @foreach (InventoryStatus s in Enum.GetValues(typeof(InventoryStatus)))
+                {
+                    <option value="@((int)s)" selected="@(ViewBag.Status == s)">@s</option>
+                }
+            </select>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Filtrele</button>
+        </div>
+    </form>
+
+    {{-- Tablo --}}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Cihaz</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">IMEI 1</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Durum</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Kaynak</th>
+                        <th class="px-4 py-3 text-right font-medium text-gray-500 dark:text-gray-400">Maliyet</th>
+                        <th class="px-4 py-3 text-right font-medium text-gray-500 dark:text-gray-400">Hedef Fiyat</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Tarih</th>
+                        <th class="px-4 py-3"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach (var item in Model)
+                    {
+                        var statusBadge = item.Status switch {
+                            InventoryStatus.Available => "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                            InventoryStatus.Sold      => "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400",
+                            InventoryStatus.Reserved  => "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+                            InventoryStatus.Scrapped  => "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+                            _ => "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                        };
+                        var statusLabel = item.Status switch {
+                            InventoryStatus.Available => "Satışta",
+                            InventoryStatus.Sold      => "Satıldı",
+                            InventoryStatus.Reserved  => "Rezerve",
+                            InventoryStatus.Scrapped  => "Hurda",
+                            InventoryStatus.UnderRepair => "Onarımda",
+                            _ => item.Status.ToString()
+                        };
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                            <td class="px-4 py-3">
+                                <div class="font-medium text-gray-900 dark:text-white">
+                                    @item.Catalog?.Model?.Brand?.Name @item.Catalog?.Model?.Name
+                                </div>
+                                @if (!string.IsNullOrEmpty(item.Storage) || !string.IsNullOrEmpty(item.Color))
+                                {
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        @item.Storage @item.Color
+                                    </div>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300 font-mono text-xs">@(item.Imei1 ?? "—")</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium @statusBadge">@statusLabel</span>
+                            </td>
+                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">@item.Source</td>
+                            <td class="px-4 py-3 text-right text-gray-900 dark:text-white">
+                                @item.CostPrice.ToString("N0") ₺
+                            </td>
+                            <td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">
+                                @item.TargetSalePrice.ToString("N0") ₺
+                            </td>
+                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
+                                @item.CreatedAt.ToString("dd.MM.yyyy")
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <a href="@Url.Action("Detail", new { id = item.Id })"
+                                   class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Detay</a>
+                                @if (item.Status == InventoryStatus.Available)
+                                {
+                                    <a href="@Url.Action("Create", "Sale", new { deviceInventoryId = item.Id })"
+                                       class="ml-2 text-xs text-green-600 dark:text-green-400 hover:underline">Sat</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="px-4 py-12 text-center text-gray-400 text-sm">Cihaz bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                <span>Toplam: @ViewBag.TotalCount cihaz</span>
+                <div class="flex gap-1">
+                    @for (int p = 1; p <= (int)ViewBag.TotalPages; p++)
+                    {
+                        <a href="?page=@p&q=@ViewBag.Q&status=@ViewBag.Status"
+                           class="@(p == (int)ViewBag.Page ? "bg-blue-600 text-white" : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300") px-3 py-1 rounded-lg border border-gray-200 dark:border-gray-600 text-xs">
+                            @p
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

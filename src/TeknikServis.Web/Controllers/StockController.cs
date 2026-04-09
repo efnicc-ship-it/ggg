@@ -17,6 +17,10 @@ public class StockController : Controller
         _user = user;
     }
 
+    // Stok ana sayfası — Parts'a yönlendir
+    [HttpGet]
+    public IActionResult Index() => RedirectToAction(nameof(Parts));
+
     // Parça stok listesi
     [HttpGet]
     public async Task<IActionResult> Parts(string? q, int page = 1, int pageSize = 25)

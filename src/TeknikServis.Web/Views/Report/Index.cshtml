@@ -1,0 +1,36 @@
+@model TeknikServis.Web.Controllers.ReportSummaryViewModel
+
+<div class="flex flex-col gap-6">
+    <div>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Raporlar</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Bu ay özeti — @DateTime.Now.ToString("MMMM yyyy")</p>
+    </div>
+
+    {{-- KPI Cards --}}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Servis Kaydı</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">@Model.TotalServicesThisMonth</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Teslim Edilen</p>
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400">@Model.DeliveredThisMonth</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Servis Geliri</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">@Model.RevenueThisMonth.ToString("N0") ₺</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Alış</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">@Model.PurchasesThisMonth</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Satış</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">@Model.SalesThisMonth</p>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center text-gray-400 dark:text-gray-500">
+        <p class="text-sm">Detaylı raporlar (Excel/PDF export) Phase 6'da gelecek.</p>
+    </div>
+</div>

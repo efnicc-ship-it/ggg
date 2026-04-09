@@ -1,0 +1,80 @@
+@using TeknikServis.Domain.Enums
+@model IEnumerable<TeknikServis.Domain.Entities.EnsarAI.AiAlert>
+
+<div class="flex flex-col gap-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Ensar AI Uyarıları</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">@ViewBag.TotalCount uyarı</p>
+        </div>
+        @if (ViewBag.TotalCount > 0)
+        {
+            <form method="post" action="@Url.Action("ResolveAll")">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                    Tümünü Çözümle
+                </button>
+            </form>
+        }
+    </div>
+
+    {{-- Filtre --}}
+    <div class="flex gap-2 flex-wrap">
+        <a href="@Url.Action("Index")" class="px-3 py-1.5 text-xs rounded-lg @(ViewBag.Resolved == null ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300")">Aktif</a>
+        <a href="@Url.Action("Index", new { resolved = true })" class="px-3 py-1.5 text-xs rounded-lg @(ViewBag.Resolved == true ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300")">Çözümlenen</a>
+    </div>
+
+    <div class="flex flex-col gap-3">
+        @foreach (var alert in Model)
+        {
+            var severityBg = alert.Severity switch {
+                AlertSeverity.Critical  => "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20",
+                AlertSeverity.Emergency => "border-red-400 dark:border-red-600 bg-red-100 dark:bg-red-900/30",
+                AlertSeverity.Warning   => "border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20",
+                _ => "border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20"
+            };
+            var severityLabel = alert.Severity switch {
+                AlertSeverity.Critical  => "Kritik",
+                AlertSeverity.Emergency => "Acil",
+                AlertSeverity.Warning   => "Uyarı",
+                _ => "Bilgi"
+            };
+            var severityColor = alert.Severity switch {
+                AlertSeverity.Critical  => "text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30",
+                AlertSeverity.Emergency => "text-red-800 dark:text-red-300 bg-red-200 dark:bg-red-900/50",
+                AlertSeverity.Warning   => "text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30",
+                _ => "text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30"
+            };
+
+            <div class="border @severityBg rounded-xl p-4 flex items-start gap-4">
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium @severityColor whitespace-nowrap">@severityLabel</span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">@alert.Title</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-0.5">@alert.Message</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        @alert.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                        @if (!string.IsNullOrEmpty(alert.EntityType))
+                        {
+                            <span class="ml-2">· @alert.EntityType #@alert.EntityId</span>
+                        }
+                    </p>
+                </div>
+                @if (!alert.IsResolved)
+                {
+                    <form method="post" action="@Url.Action("Resolve", new { id = alert.Id })">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="text-xs text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 whitespace-nowrap px-2 py-1">
+                            Çözümle
+                        </button>
+                    </form>
+                }
+            </div>
+        }
+        @if (!Model.Any())
+        {
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl py-12 text-center text-gray-400 text-sm">
+                Aktif uyarı yok.
+            </div>
+        }
+    </div>
+</div>

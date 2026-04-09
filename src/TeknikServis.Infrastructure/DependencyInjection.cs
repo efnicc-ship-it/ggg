@@ -11,6 +11,7 @@ using TeknikServis.Infrastructure.Persistence;
 using TeknikServis.Infrastructure.Services.Encryption;
 using TeknikServis.Infrastructure.Services.FileStorage;
 using TeknikServis.Infrastructure.Services.Label;
+using TeknikServis.Infrastructure.MultiTenancy;
 using TeknikServis.Infrastructure.Services.Notifications;
 using TeknikServis.Infrastructure.Services.Qr;
 
@@ -74,6 +75,7 @@ public static class DependencyInjection
 
         services.AddHttpClient<ISmsService, SmsService>();
         services.AddHttpClient<IWhatsAppService, WhatsAppService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         // Hangfire jobs (transient — Hangfire resolves per execution)
         services.AddTransient<Jobs.AiRuleEngineJob>();

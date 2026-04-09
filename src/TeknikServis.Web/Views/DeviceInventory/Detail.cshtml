@@ -1,0 +1,158 @@
+@using TeknikServis.Domain.Enums
+@model TeknikServis.Domain.Entities.Device.DeviceInventory
+
+@{
+    var statusLabel = Model.Status switch {
+        InventoryStatus.Available   => "Satışta",
+        InventoryStatus.Sold        => "Satıldı",
+        InventoryStatus.Reserved    => "Rezerve",
+        InventoryStatus.Scrapped    => "Hurda",
+        InventoryStatus.UnderRepair => "Onarımda",
+        _ => Model.Status.ToString()
+    };
+    var statusColor = Model.Status switch {
+        InventoryStatus.Available   => "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+        InventoryStatus.Sold        => "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400",
+        InventoryStatus.Reserved    => "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+        InventoryStatus.Scrapped    => "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+        _ => "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+    };
+}
+
+<div class="max-w-3xl mx-auto flex flex-col gap-5">
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Index")" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <div class="flex-1">
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+                @Model.Catalog?.Model?.Brand?.Name @Model.Catalog?.Model?.Name
+            </h1>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium @statusColor">@statusLabel</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">@Model.Condition</span>
+            </div>
+        </div>
+        @if (Model.Status == InventoryStatus.Available)
+        {
+            <a href="@Url.Action("Create", "Sale", new { deviceInventoryId = Model.Id })"
+               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
+                Sat
+            </a>
+        }
+    </div>
+
+    {{-- Cihaz Bilgileri --}}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Cihaz Bilgileri</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">IMEI 1</p>
+                <p class="font-mono text-gray-900 dark:text-white mt-0.5">@(Model.Imei1 ?? "—")</p>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Imei2))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">IMEI 2</p>
+                    <p class="font-mono text-gray-900 dark:text-white mt-0.5">@Model.Imei2</p>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Ram))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">RAM</p>
+                    <p class="text-gray-900 dark:text-white mt-0.5">@Model.Ram</p>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Storage))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Depolama</p>
+                    <p class="text-gray-900 dark:text-white mt-0.5">@Model.Storage</p>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Color))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Renk</p>
+                    <p class="text-gray-900 dark:text-white mt-0.5">@Model.Color</p>
+                </div>
+            }
+            @if (Model.BatteryHealth.HasValue)
+            {
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Pil Sağlığı</p>
+                    <p class="text-gray-900 dark:text-white mt-0.5">%@Model.BatteryHealth</p>
+                </div>
+            }
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">IMEI Kontrolü</p>
+                <p class="mt-0.5 @(Model.ImeiChecked ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400")">
+                    @(Model.ImeiChecked ? "Kontrol edildi" : "Kontrol edilmedi")
+                </p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Kaynak</p>
+                <p class="text-gray-900 dark:text-white mt-0.5">@Model.Source</p>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.PhysicalConditionNotes))
+        {
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Fiziksel Durum Notları</p>
+                <p class="text-sm text-gray-700 dark:text-gray-300">@Model.PhysicalConditionNotes</p>
+            </div>
+        }
+    </div>
+
+    {{-- Fiyat --}}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Fiyat</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Alış Fiyatı</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white mt-0.5">@Model.PurchasePrice.ToString("N0") ₺</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Hedef Satış Fiyatı</p>
+                <p class="text-lg font-semibold text-blue-600 dark:text-blue-400 mt-0.5">@Model.TargetSalePrice.ToString("N0") ₺</p>
+            </div>
+        </div>
+        @if (Model.TargetSalePrice > Model.PurchasePrice)
+        {
+            var margin = ((Model.TargetSalePrice - Model.PurchasePrice) / Model.PurchasePrice * 100);
+            <div class="mt-3 text-xs text-green-600 dark:text-green-400">
+                Hedef kar marjı: %@margin.ToString("F1")
+                (+@((Model.TargetSalePrice - Model.PurchasePrice).ToString("N0")) ₺)
+            </div>
+        }
+    </div>
+
+    {{-- Durum Değiştir --}}
+    @if (Model.Status != InventoryStatus.Sold)
+    {
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Durum Değiştir</h2>
+            <form method="post" action="@Url.Action("UpdateStatus", new { id = Model.Id })" class="flex gap-2 flex-wrap">
+                @Html.AntiForgeryToken()
+                <select name="status" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                    @foreach (InventoryStatus s in new[] { InventoryStatus.Available, InventoryStatus.Reserved, InventoryStatus.UnderRepair, InventoryStatus.Scrapped })
+                    {
+                        <option value="@((int)s)" selected="@(Model.Status == s)">
+                            @(s == InventoryStatus.Available ? "Satışta" : s == InventoryStatus.Reserved ? "Rezerve" : s == InventoryStatus.UnderRepair ? "Onarımda" : "Hurda")
+                        </option>
+                    }
+                </select>
+                <button type="submit" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                    Güncelle
+                </button>
+            </form>
+        </div>
+    }
+
+    <div class="text-xs text-gray-400 dark:text-gray-500">
+        Eklendi: @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+    </div>
+</div>

@@ -1,0 +1,57 @@
+@model IEnumerable<TeknikServis.Domain.Entities.Appointment.AppointmentRecord>
+
+<div class="flex flex-col gap-5">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Randevular</h1>
+    </div>
+
+    {{-- Tarih filtresi --}}
+    <form method="get" class="flex gap-3">
+        <input type="date" name="date" value="@ViewBag.Date"
+               class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"/>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Filtrele</button>
+        <a href="@Url.Action("Index")" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">Bugündengeri</a>
+    </form>
+
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Tarih/Saat</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Müşteri</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Telefon</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Notlar</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">Durum</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                @foreach (var item in Model)
+                {
+                    var statusBadge = item.Status switch {
+                        "Confirmed"  => "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                        "Completed"  => "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400",
+                        "Cancelled"  => "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+                        _            => "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                    };
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
+                            @item.AppointmentDate.ToString("dd.MM.yyyy HH:mm")
+                        </td>
+                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">@item.CustomerName</td>
+                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">@item.CustomerPhone</td>
+                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">@(item.Notes ?? "—")</td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium @statusBadge">@item.Status</span>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="px-4 py-12 text-center text-gray-400 text-sm">Randevu bulunamadı.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
