@@ -77,6 +77,9 @@ public static class DependencyInjection
 
         // Hangfire jobs (transient — Hangfire resolves per execution)
         services.AddTransient<Jobs.AiRuleEngineJob>();
+        services.AddTransient<Jobs.MediaCleanupJob>();
+        services.AddTransient<Jobs.LowStockAlertJob>();
+        services.AddTransient<Jobs.SmartReminderJob>();
 
         return services;
     }
@@ -109,5 +112,29 @@ public static class DependencyInjection
             "ai-unsold-devices",
             job => job.CheckUnsoldDevices(CancellationToken.None),
             "0 9 * * *");
+
+        // Medya temizleme — Her gün gece 03:00
+        manager.AddOrUpdate<Jobs.MediaCleanupJob>(
+            "media-cleanup",
+            job => job.CleanOldMedia(CancellationToken.None),
+            "0 3 * * *");
+
+        // Düşük stok uyarısı — Her saat
+        manager.AddOrUpdate<Jobs.LowStockAlertJob>(
+            "low-stock-check",
+            job => job.CheckLowStock(CancellationToken.None),
+            "0 * * * *");
+
+        // Hareketsiz servis kaydı — Her saat
+        manager.AddOrUpdate<Jobs.SmartReminderJob>(
+            "idle-service-check",
+            job => job.CheckIdleServiceRecords(CancellationToken.None),
+            "0 * * * *");
+
+        // Memnuniyet anketi — Her 2 saatte bir
+        manager.AddOrUpdate<Jobs.SmartReminderJob>(
+            "survey-sender",
+            job => job.SendSurveys(CancellationToken.None),
+            "0 */2 * * *");
     }
 }

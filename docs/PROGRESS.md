@@ -1,6 +1,6 @@
 # TeknikServis ERP — İlerleme Takibi
 
-Son güncelleme: 2026-04-08
+Son güncelleme: 2026-04-09
 
 ---
 
@@ -22,14 +22,19 @@ Son güncelleme: 2026-04-08
 
 ---
 
-## Phase 2 — Müşteri + Servis (Çekirdek) ⏳ SIRADAKI
+## Phase 2 — Müşteri + Servis (Çekirdek) 🔄 DEVAM EDİYOR
 
-> **Not:** Diğer oturumda (session_01JipMM9HbSjmA3aZURgHzAS) Application Features ve Web Controllers
-> yazılmaya başlandı ama session limit dolunca commit edilemeden bitti. Repo'ya girmedi.
-> Buradan sıfırdan devam ediliyor.
-
-- ⏳ Customer CRUD + KVKK şifreleme + popup partial
-- ⏳ Device Catalog yönetimi (Type→Brand→Model→Variant AJAX cascading)
+- ✅ Customer CRUD (Index, Detail, Edit, CreatePopup AJAX)
+- ✅ Customer popup partial (servis/satış formundan hızlı müşteri ekleme)
+- ✅ Catalog AJAX endpoints: Type→Brand→Model→Variant cascading + customer/part arama
+- ✅ Sale Create view + CreateSaleCommand handler (cihaz + aksesuar modları)
+- ✅ Hangfire background jobs:
+  - ✅ MediaCleanupJob (2 yıl sonra soft-delete + dosya silme, her gece 03:00)
+  - ✅ LowStockAlertJob (threshold altı stok → AiAlert, her saat)
+  - ✅ SmartReminderJob (hareketsiz servis + anket, saatlik/2 saatlik)
+  - ✅ AiRuleEngineJob (teknisyen/parça/bayi/cihaz kuralları, kayıtlı)
+- ✅ ServiceRecord.SurveySent alanı + migration (20260409070000)
+- ⏳ Device Catalog yönetimi (Type→Brand→Model→Variant Admin CRUD)
 - ⏳ CommonFault + CommonAction listeleri (admin CRUD + hızlı seçim)
 - ⏳ ServiceRecord CRUD + durum makinesi (tam akış)
 - ⏳ IMEI bazlı geçmiş kontrolü + kara liste kontrolü

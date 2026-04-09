@@ -1,0 +1,231 @@
+@using TeknikServis.Domain.Enums
+
+<div class="max-w-3xl mx-auto flex flex-col gap-5" x-data="saleForm()">
+
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Index","Sale")"
+           class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Yeni Satış</h1>
+    </div>
+
+    <form method="post" action="@Url.Action("Create","Sale")" class="flex flex-col gap-5">
+        @Html.AntiForgeryToken()
+
+        {{-- Satış tipi --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Satış Tipi</h2>
+            <div class="flex gap-3">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="isAccessorySaleOnly" value="false" x-model="accessoryOnly" class="text-blue-600"/>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Cihaz Satışı</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="isAccessorySaleOnly" value="true" x-model="accessoryOnly" class="text-blue-600"/>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Aksesuar / Stok Satışı</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Müşteri --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Müşteri <span x-show="accessoryOnly === 'false'" class="text-red-500">*</span>
+                <span x-show="accessoryOnly === 'true'" class="text-xs font-normal text-gray-400">(opsiyonel)</span>
+            </h2>
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <input type="text" id="customerSearchInput" placeholder="İsim veya telefon ile ara..."
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           autocomplete="off"
+                           x-on:input.debounce.300ms="searchCustomer($event.target.value)"/>
+                    <div x-show="customerResults.length > 0"
+                         class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        <template x-for="c in customerResults" :key="c.id">
+                            <div class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer text-sm flex justify-between"
+                                 x-on:click="selectCustomer(c)">
+                                <span x-text="c.fullName" class="font-medium text-gray-900 dark:text-white"></span>
+                                <span x-text="c.phone" class="text-gray-500"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('newCustomerModal').classList.remove('hidden')"
+                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm rounded-lg transition-colors whitespace-nowrap">
+                    + Yeni
+                </button>
+            </div>
+            <div x-show="selectedCustomer" class="mt-2 flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span x-text="selectedCustomer?.fullName"></span>
+                <button type="button" class="text-gray-400 hover:text-red-500" x-on:click="clearCustomer()">✕</button>
+            </div>
+            <input type="hidden" name="customerId" x-bind:value="selectedCustomer?.id"/>
+        </div>
+
+        {{-- Cihaz seçimi (cihaz satışında) --}}
+        <div x-show="accessoryOnly === 'false'" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Cihaz Seç</h2>
+            @if (ViewBag.AvailableDevices != null)
+            {
+                <select name="deviceInventoryIds[]"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">-- Cihaz seçin --</option>
+                    @foreach (var dev in (IEnumerable<dynamic>)ViewBag.AvailableDevices)
+                    {
+                        <option value="@dev.Id">
+                            @dev.Catalog?.Name — IMEI: @(dev.Imei1 ?? "-") — Hedef Fiyat: @dev.TargetSalePrice.ToString("N0") ₺
+                        </option>
+                    }
+                </select>
+            }
+            <div class="mt-3 grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Satış Fiyatı (₺)</label>
+                    <input type="number" name="unitPrices[]" step="0.01" min="0"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="0.00"/>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Garanti (gün)</label>
+                    <input type="number" name="warrantyDays" min="0"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="örn: 90"/>
+                </div>
+            </div>
+            <input type="hidden" name="quantities[]" value="1"/>
+            <input type="hidden" name="descriptions[]" value="Cihaz satışı"/>
+            <input type="hidden" name="stockItemIds[]" value=""/>
+        </div>
+
+        {{-- Aksesuar / stok kalemleri --}}
+        <div x-show="accessoryOnly === 'true'" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Ürünler</h2>
+                <button type="button" x-on:click="addItem()"
+                        class="text-xs text-blue-600 dark:text-blue-400 hover:underline">+ Satır Ekle</button>
+            </div>
+            <div class="flex flex-col gap-2">
+                <template x-for="(item, idx) in items" :key="idx">
+                    <div class="flex gap-2 items-start">
+                        <input type="text" x-model="item.description" :name="'descriptions[]'" placeholder="Ürün adı"
+                               class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+                        <input type="number" x-model="item.qty" :name="'quantities[]'" min="1" placeholder="Adet"
+                               class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+                        <input type="number" x-model="item.price" :name="'unitPrices[]'" step="0.01" min="0" placeholder="Fiyat ₺"
+                               class="w-28 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+                        <input type="hidden" :name="'deviceInventoryIds[]'" value=""/>
+                        <input type="hidden" :name="'stockItemIds[]'" value=""/>
+                        <button type="button" x-on:click="removeItem(idx)" class="p-2 text-gray-400 hover:text-red-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        {{-- Ödeme --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Ödeme</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Ödeme Durumu</label>
+                    <select name="paymentStatus"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="@((int)PaymentStatus.Paid)">Ödendi</option>
+                        <option value="@((int)PaymentStatus.PartiallyPaid)">Kısmi Ödeme</option>
+                        <option value="@((int)PaymentStatus.Unpaid)">Ödenmedi (Vadeli)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Ödenen Tutar (₺)</label>
+                    <input type="number" name="paidAmount" step="0.01" min="0" value="0"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">İndirim (₺)</label>
+                    <input type="number" name="discountAmount" min="0" value="0"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+                </div>
+            </div>
+            <div class="mt-4">
+                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Notlar</label>
+                <textarea name="notes" rows="2" placeholder="İç not (opsiyonel)"
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="submit"
+                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Satışı Kaydet
+            </button>
+            <a href="@Url.Action("Index","Sale")"
+               class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors">
+                İptal
+            </a>
+        </div>
+    </form>
+</div>
+
+{{-- Yeni Müşteri Modal --}}
+<div id="newCustomerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Yeni Müşteri</h3>
+            <button onclick="document.getElementById('newCustomerModal').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <partial name="~/Views/Customer/_CreateCustomerPartial.cshtml"/>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function saleForm() {
+    return {
+        accessoryOnly: 'false',
+        selectedCustomer: null,
+        customerResults: [],
+        items: [{ description: '', qty: 1, price: 0 }],
+
+        async searchCustomer(q) {
+            if (!q || q.length < 2) { this.customerResults = []; return; }
+            const res = await fetch(`/catalog/ajax/customers?q=${encodeURIComponent(q)}`);
+            this.customerResults = await res.json();
+        },
+        selectCustomer(c) { this.selectedCustomer = c; this.customerResults = []; document.getElementById('customerSearchInput').value = c.fullName; },
+        clearCustomer() { this.selectedCustomer = null; document.getElementById('customerSearchInput').value = ''; },
+        addItem() { this.items.push({ description: '', qty: 1, price: 0 }); },
+        removeItem(i) { this.items.splice(i, 1); }
+    };
+}
+
+function closeCustomerPopup() { document.getElementById('newCustomerModal').classList.add('hidden'); }
+
+async function submitCustomerPopup() {
+    const form = document.getElementById('createCustomerPopupForm');
+    const data = new FormData(form);
+    const res = await fetch('@Url.Action("CreatePopup","Customer")', { method: 'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+        document.querySelector('[x-data]').__x.$data.selectCustomer({ id: json.id, fullName: json.fullName, phone: json.phone });
+        closeCustomerPopup();
+    } else {
+        document.getElementById('customerPopupError').textContent = json.error;
+        document.getElementById('customerPopupError').classList.remove('hidden');
+    }
+}
+</script>
+}

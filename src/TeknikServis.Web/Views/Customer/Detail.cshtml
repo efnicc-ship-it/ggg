@@ -1,0 +1,182 @@
+@model TeknikServis.Application.Features.Customer.Queries.GetCustomerDetail.CustomerDetailDto
+@using TeknikServis.Domain.Enums
+
+<div class="flex flex-col gap-5">
+
+    {{-- Header --}}
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="flex items-center gap-3 flex-wrap">
+            <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-700 dark:text-blue-300 font-bold text-lg">
+                @Model.FirstName[0]@Model.LastName[0]
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="text-xl font-semibold text-gray-900 dark:text-white">@Model.FullName</h1>
+                    @if (Model.IsBlacklisted)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">Kara Liste</span>
+                    }
+                    @if (Model.IsDealer)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400">Bayi</span>
+                    }
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    @Model.Phone
+                    @if (!string.IsNullOrEmpty(Model.Email)) { <span class="ml-2">· @Model.Email</span> }
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+            <a href="@Url.Action("Create","Service")?customerId=@Model.Id"
+               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Servis Kaydı Aç
+            </a>
+            <a href="@Url.Action("Edit","Customer", new { id = Model.Id })"
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors">
+                Düzenle
+            </a>
+        </div>
+    </div>
+
+    {{-- Stats row --}}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Toplam Servis</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">@Model.TotalServiceCount</p>
+            @if (Model.OpenServiceCount > 0)
+            {
+                <p class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">@Model.OpenServiceCount açık</p>
+            }
+        </div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Servis Geliri</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">@Model.TotalServiceRevenue.ToString("N0") ₺</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Alınan Cihaz</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">@Model.TotalPurchaseCount</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Puan</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                @(Model.RatingCount > 0 ? Model.AverageRating.ToString("0.0") : "-")
+            </p>
+            @if (Model.RatingCount > 0)
+            {
+                <p class="text-xs text-gray-500 mt-0.5">@Model.RatingCount değerlendirme</p>
+            }
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {{-- Contact info --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">İletişim Bilgileri</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-xs text-gray-500 dark:text-gray-400">Telefon</dt>
+                    <dd class="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2 mt-0.5">
+                        <a href="tel:@Model.Phone" class="hover:text-blue-600">@Model.Phone</a>
+                        @if (Model.PhoneVerified) { <span class="text-xs text-green-600 dark:text-green-400">Doğrulandı</span> }
+                    </dd>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Phone2))
+                {
+                    <div>
+                        <dt class="text-xs text-gray-500 dark:text-gray-400">Tel 2</dt>
+                        <dd class="text-sm text-gray-900 dark:text-white mt-0.5"><a href="tel:@Model.Phone2" class="hover:text-blue-600">@Model.Phone2</a></dd>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Email))
+                {
+                    <div>
+                        <dt class="text-xs text-gray-500 dark:text-gray-400">E-posta</dt>
+                        <dd class="text-sm text-gray-900 dark:text-white flex items-center gap-2 mt-0.5">
+                            <a href="mailto:@Model.Email" class="hover:text-blue-600 truncate">@Model.Email</a>
+                            @if (Model.EmailVerified) { <span class="text-xs text-green-600 dark:text-green-400">Doğrulandı</span> }
+                        </dd>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.City) || !string.IsNullOrEmpty(Model.Address))
+                {
+                    <div>
+                        <dt class="text-xs text-gray-500 dark:text-gray-400">Adres</dt>
+                        <dd class="text-sm text-gray-900 dark:text-white mt-0.5">
+                            @(Model.Address ?? "")@(!string.IsNullOrEmpty(Model.City) ? " / " + Model.City : "")
+                        </dd>
+                    </div>
+                }
+                <div>
+                    <dt class="text-xs text-gray-500 dark:text-gray-400">Bildirim Tercihi</dt>
+                    <dd class="text-sm text-gray-900 dark:text-white mt-0.5">
+                        @switch (Model.CommunicationPreference)
+                        {
+                            case CommunicationPreference.SMS: <text>SMS</text> break;
+                            case CommunicationPreference.WhatsApp: <text>WhatsApp</text> break;
+                            case CommunicationPreference.Email: <text>E-posta</text> break;
+                            default: <text>Hepsi</text> break;
+                        }
+                        @if (Model.SmsOptOut || Model.WhatsAppOptOut || Model.EmailOptOut)
+                        {
+                            <span class="ml-2 text-xs text-amber-600 dark:text-amber-400">(Bazı kanallar kapalı)</span>
+                        }
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-gray-500 dark:text-gray-400">Kayıt Tarihi</dt>
+                    <dd class="text-sm text-gray-900 dark:text-white mt-0.5">@Model.CreatedAt.ToString("dd MMMM yyyy")</dd>
+                </div>
+            </dl>
+
+            @if (Model.IsBlacklisted && !string.IsNullOrEmpty(Model.BlacklistReason))
+            {
+                <div class="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-lg">
+                    <p class="text-xs font-medium text-red-700 dark:text-red-400">Kara Liste Sebebi</p>
+                    <p class="text-sm text-red-600 dark:text-red-300 mt-1">@Model.BlacklistReason</p>
+                </div>
+            }
+        </div>
+
+        {{-- Service history --}}
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Servis Geçmişi</h2>
+                <a href="@Url.Action("Index","Service")?customerId=@Model.Id" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Tümünü gör</a>
+            </div>
+
+            @if (Model.RecentServices.Count == 0)
+            {
+                <p class="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">Henüz servis kaydı yok.</p>
+            }
+            else
+            {
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach (var svc in Model.RecentServices)
+                    {
+                        <div class="py-3 flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <a href="@Url.Action("Detail","Service", new { id = svc.Id })"
+                                       class="text-sm font-mono font-medium text-blue-600 dark:text-blue-400 hover:underline">@svc.RecordNumber</a>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium @svc.StatusColor">@svc.StatusDisplay</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                    @svc.DeviceBrand @svc.DeviceModel · @svc.FaultDescription
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                @if (svc.FinalPrice.HasValue)
+                                {
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">@svc.FinalPrice.Value.ToString("N0") ₺</p>
+                                }
+                                <p class="text-xs text-gray-400 mt-0.5">@svc.CreatedAt.ToString("dd.MM.yyyy")</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

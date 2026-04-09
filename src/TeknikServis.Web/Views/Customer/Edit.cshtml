@@ -1,0 +1,110 @@
+@model TeknikServis.Application.Features.Customer.Commands.UpdateCustomer.UpdateCustomerCommand
+@using TeknikServis.Domain.Enums
+
+<div class="max-w-2xl mx-auto flex flex-col gap-5">
+
+    <div class="flex items-center gap-3">
+        <a href="@Url.Action("Detail","Customer", new { id = Model.Id })"
+           class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Müşteri Düzenle</h1>
+    </div>
+
+    <form asp-action="Edit" method="post" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 flex flex-col gap-5">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id"/>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label asp-for="FirstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ad <span class="text-red-500">*</span></label>
+                <input asp-for="FirstName" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ad"/>
+                <span asp-validation-for="FirstName" class="text-xs text-red-500 mt-1"></span>
+            </div>
+            <div>
+                <label asp-for="LastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Soyad <span class="text-red-500">*</span></label>
+                <input asp-for="LastName" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Soyad"/>
+                <span asp-validation-for="LastName" class="text-xs text-red-500 mt-1"></span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label asp-for="Phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefon <span class="text-red-500">*</span></label>
+                <input asp-for="Phone" type="tel" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="05xx xxx xx xx"/>
+                <span asp-validation-for="Phone" class="text-xs text-red-500 mt-1"></span>
+            </div>
+            <div>
+                <label asp-for="Phone2" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefon 2</label>
+                <input asp-for="Phone2" type="tel" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Opsiyonel"/>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="Email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-posta</label>
+            <input asp-for="Email" type="email" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="ornek@email.com"/>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label asp-for="City" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Şehir</label>
+                <input asp-for="City" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="İstanbul"/>
+            </div>
+            <div>
+                <label asp-for="CommunicationPreference" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bildirim Tercihi</label>
+                <select asp-for="CommunicationPreference" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="@((int)CommunicationPreference.WhatsApp)">WhatsApp</option>
+                    <option value="@((int)CommunicationPreference.SMS)">SMS</option>
+                    <option value="@((int)CommunicationPreference.Email)">E-posta</option>
+                    <option value="@((int)CommunicationPreference.All)">Hepsi</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="Address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Adres</label>
+            <textarea asp-for="Address" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Adres (opsiyonel)"></textarea>
+        </div>
+
+        {{-- Opt-out --}}
+        <div class="flex flex-col gap-2">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">KVKK Opt-out</p>
+            <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                <input asp-for="SmsOptOut" type="checkbox" class="rounded border-gray-300 text-blue-600"/>
+                SMS almak istemiyor
+            </label>
+            <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                <input asp-for="WhatsAppOptOut" type="checkbox" class="rounded border-gray-300 text-blue-600"/>
+                WhatsApp almak istemiyor
+            </label>
+            <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                <input asp-for="EmailOptOut" type="checkbox" class="rounded border-gray-300 text-blue-600"/>
+                E-posta almak istemiyor
+            </label>
+        </div>
+
+        {{-- Kara liste --}}
+        <div x-data="{ blacklisted: @(Model.IsBlacklisted ? "true" : "false") }" class="border border-red-200 dark:border-red-800/40 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input asp-for="IsBlacklisted" type="checkbox" x-model="blacklisted" class="rounded border-gray-300 text-red-600"/>
+                <span class="text-sm font-medium text-red-700 dark:text-red-400">Kara Listede</span>
+            </label>
+            <div x-show="blacklisted" x-cloak class="mt-3">
+                <label asp-for="BlacklistReason" class="block text-xs text-red-600 dark:text-red-400 mb-1">Sebep (zorunlu)</label>
+                <input asp-for="BlacklistReason" class="w-full px-3 py-2 border border-red-300 dark:border-red-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Kara liste sebebi..."/>
+            </div>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Kaydet
+            </button>
+            <a href="@Url.Action("Detail","Customer", new { id = Model.Id })"
+               class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors">
+                İptal
+            </a>
+        </div>
+    </form>
+</div>

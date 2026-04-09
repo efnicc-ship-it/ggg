@@ -1,0 +1,62 @@
+@model TeknikServis.Application.Features.Customer.Commands.CreateCustomer.CreateCustomerCommand
+@using TeknikServis.Domain.Enums
+
+<form id="createCustomerPopupForm" class="flex flex-col gap-4">
+    @Html.AntiForgeryToken()
+
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Ad <span class="text-red-500">*</span></label>
+            <input name="FirstName" required
+                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   placeholder="Ad"/>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Soyad <span class="text-red-500">*</span></label>
+            <input name="LastName" required
+                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   placeholder="Soyad"/>
+        </div>
+    </div>
+
+    <div>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Telefon <span class="text-red-500">*</span></label>
+        <input name="Phone" type="tel" required
+               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+               placeholder="05xx xxx xx xx"/>
+    </div>
+
+    <div>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">E-posta</label>
+        <input name="Email" type="email"
+               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+               placeholder="opsiyonel"/>
+    </div>
+
+    <div>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Bildirim Tercihi</label>
+        <select name="CommunicationPreference"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="@((int)CommunicationPreference.WhatsApp)">WhatsApp</option>
+            <option value="@((int)CommunicationPreference.SMS)">SMS</option>
+            <option value="@((int)CommunicationPreference.Email)">E-posta</option>
+        </select>
+    </div>
+
+    <input type="hidden" name="SmsOptOut" value="false"/>
+    <input type="hidden" name="WhatsAppOptOut" value="false"/>
+    <input type="hidden" name="EmailOptOut" value="false"/>
+
+    <div id="customerPopupError" class="hidden text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2"></div>
+
+    <div class="flex gap-3 pt-1">
+        <button type="button" onclick="submitCustomerPopup()"
+                class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+            Kaydet
+        </button>
+        <button type="button" onclick="closeCustomerPopup()"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors">
+            İptal
+        </button>
+    </div>
+</form>

@@ -71,6 +71,7 @@ public class ServiceRecord : BaseEntity, IAuditableEntity, ISoftDelete
     // Teslim ve etiket
     public bool LabelPrinted { get; set; } = false;
     public DateTime? DeliveredAt { get; set; }
+    public bool SurveySent { get; set; } = false;
 
     // YouTube yayın
     public bool LiveStreamPlanned { get; set; } = false;
