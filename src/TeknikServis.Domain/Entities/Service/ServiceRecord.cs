@@ -39,6 +39,26 @@ public class ServiceRecord : BaseEntity, IAuditableEntity, ISoftDelete
     public DateTime? ApprovalSentAt { get; set; }
     public DateTime? ApprovalRespondedAt { get; set; }
 
+    // ── Bayi İletişim ve Akış Ayarları ──────────────────────────────────────
+    // true  = bayi iletişim kişisi (onay/bildirimler bayiye gider, müşteriye değil)
+    // false = müşteri ile doğrudan iletişim (bayinin tercihi veya kaydı açarken seçim)
+    public bool DealerIsContactPerson { get; set; } = false;
+
+    // Kargo takip (müşteri/bayi kargodan gönderdiğinde)
+    public string? InboundCargoTrackingNumber { get; set; }
+    public string? InboundCargoCompany { get; set; }
+    public DateTime? CargoReceivedAt { get; set; }
+
+    // Toplu Bayi Sevkiyatı
+    public int? DealerBatchShipmentId { get; set; }   // Bayiye yapılan toplu sevkiyata bağlı
+    public DateTime? EnteredDealerPoolAt { get; set; } // Bayi havuzuna alındığı an
+    public DateTime? DealerCreditHoldAt { get; set; }  // Cari limit engeline takıldığı an
+
+    // Dış servis (taşeron)
+    public string? ExternalServiceProvider { get; set; } // Hangi dış servis/taşeron
+    public DateTime? ExternalServiceSentAt { get; set; }
+    public DateTime? ExternalServiceReturnedAt { get; set; }
+
     // Ödeme
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;
     public decimal TotalPaid { get; set; } = 0;
@@ -62,6 +82,7 @@ public class ServiceRecord : BaseEntity, IAuditableEntity, ISoftDelete
     public int? DeletedBy { get; set; }
 
     // Navigation properties
+    public Dealer.DealerBatchShipment? DealerBatchShipment { get; set; }
     public Customer.Customer Customer { get; set; } = null!;
     public Device.DeviceModel DeviceModel { get; set; } = null!;
     public Device.DeviceModelVariant? DeviceModelVariant { get; set; }

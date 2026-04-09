@@ -1,0 +1,130 @@
+@model IEnumerable<TeknikServis.Domain.Entities.Device.DeviceModelVariant>
+@{
+    var deviceModel = ViewBag.Model as TeknikServis.Domain.Entities.Device.DeviceModel;
+}
+
+<div class="flex flex-col gap-5">
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-1">
+                <a href="@Url.Action("Index","Catalog")" class="hover:text-blue-600 dark:hover:text-blue-400">Katalog</a>
+                <span>/</span>
+                <a href="@Url.Action("Brands","Catalog", new{typeId=deviceModel?.Brand?.DeviceTypeId})" class="hover:text-blue-600 dark:hover:text-blue-400">@deviceModel?.Brand?.DeviceType?.Name</a>
+                <span>/</span>
+                <a href="@Url.Action("Models","Catalog", new{brandId=deviceModel?.BrandId})" class="hover:text-blue-600 dark:hover:text-blue-400">@deviceModel?.Brand?.Name</a>
+                <span>/</span>
+                <span class="text-gray-600 dark:text-gray-300">@deviceModel?.Name</span>
+            </nav>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">@deviceModel?.Name — Varyantlar</h1>
+            <p class="text-xs text-gray-400 mt-0.5">Her varyantın kendine ait Model Kodu (ör: A3290 = 128GB, A3291 = 256GB) olmalıdır.</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl px-4 py-3 text-sm text-green-700 dark:text-green-400">@TempData["Success"]</div>
+    }
+
+    @* Yeni Varyant Ekle *@
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Yeni Varyant Ekle</h2>
+        <form method="post" action="@Url.Action("CreateVariant","Catalog")" class="flex flex-col gap-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="modelId" value="@deviceModel?.Id"/>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Varyant Adı <span class="text-red-500">*</span></label>
+                    <input type="text" name="variantName" required placeholder="Örn: 128GB, 256GB Gece Yarısı"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Model Kodu <span class="text-red-500">*</span></label>
+                    <input type="text" name="modelCode" required placeholder="Örn: A3290"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sıra</label>
+                    <input type="number" name="sortOrder" value="0"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Depolama</label>
+                    <input type="text" name="storage" placeholder="Örn: 128GB, 256GB, 1TB"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">RAM</label>
+                    <input type="text" name="ram" placeholder="Örn: 8GB, 16GB"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Renk</label>
+                    <input type="text" name="color" placeholder="Örn: Titanium, Siyah, Gece Yarısı"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">Varyant Ekle</button>
+            </div>
+        </form>
+    </div>
+
+    @* Varyant Listesi *@
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-12 text-gray-400 dark:text-gray-500 text-sm">Bu modele tanımlı varyant yok</div>
+        }
+        else
+        {
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Varyant Adı</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Model Kodu</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Depolama</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">RAM</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Renk</th>
+                        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Durum</th>
+                        <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach (var variant in Model)
+                    {
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                            <td class="px-5 py-3 font-medium text-gray-800 dark:text-gray-200">@variant.VariantName</td>
+                            <td class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">@variant.ModelCode</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">@(variant.Storage ?? "—")</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">@(variant.Ram ?? "—")</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">@(variant.Color ?? "—")</td>
+                            <td class="px-4 py-3 text-center">
+                                @if (variant.IsActive)
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">Pasif</span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <form method="post" action="@Url.Action("ToggleVariant","Catalog")" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@variant.Id"/>
+                                    <input type="hidden" name="modelId" value="@deviceModel?.Id"/>
+                                    <button type="submit" class="px-3 py-1 text-xs border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        @(variant.IsActive ? "Pasif Et" : "Aktif Et")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

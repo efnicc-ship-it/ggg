@@ -1,0 +1,129 @@
+@model IEnumerable<TeknikServis.Domain.Entities.Device.DeviceModel>
+@{
+    var brand = ViewBag.Brand as TeknikServis.Domain.Entities.Device.DeviceBrand;
+}
+
+<div class="flex flex-col gap-5">
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-1">
+                <a href="@Url.Action("Index","Catalog")" class="hover:text-blue-600 dark:hover:text-blue-400">Katalog</a>
+                <span>/</span>
+                <a href="@Url.Action("Brands","Catalog", new{typeId=brand?.DeviceTypeId})" class="hover:text-blue-600 dark:hover:text-blue-400">@brand?.DeviceType?.Name</a>
+                <span>/</span>
+                <span class="text-gray-600 dark:text-gray-300">@brand?.Name</span>
+            </nav>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">@brand?.Name — Modeller</h1>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl px-4 py-3 text-sm text-green-700 dark:text-green-400">@TempData["Success"]</div>
+    }
+
+    @* Yeni Model Ekle *@
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Yeni Model Ekle</h2>
+        <form method="post" action="@Url.Action("CreateModel","Catalog")" class="flex flex-col gap-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="brandId" value="@brand?.Id"/>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Model Adı <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" required placeholder="Örn: iPhone 15 Pro"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Model Kodu (varyantsız için)</label>
+                    <input type="text" name="modelCode" placeholder="Örn: A3293"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sıra</label>
+                    <input type="number" name="sortOrder" value="0"
+                           class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="hasVariants" value="true"
+                           class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Varyantları var (128GB / 256GB / vb.)</span>
+                </label>
+                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">Model Ekle</button>
+            </div>
+        </form>
+    </div>
+
+    @* Model Listesi *@
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-12 text-gray-400 dark:text-gray-500 text-sm">Bu markada model tanımlanmamış</div>
+        }
+        else
+        {
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Model Adı</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Model Kodu</th>
+                        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Varyant</th>
+                        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Durum</th>
+                        <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach (var m in Model)
+                    {
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                            <td class="px-5 py-3 font-medium text-gray-800 dark:text-gray-200">@m.Name</td>
+                            <td class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">@(m.ModelCode ?? "—")</td>
+                            <td class="px-4 py-3 text-center">
+                                @if (m.HasVariants)
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400">@m.Variants.Count varyant</span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400 text-xs">Yok</span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                @if (m.IsActive)
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">Pasif</span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    @if (m.HasVariants)
+                                    {
+                                        <a href="@Url.Action("Variants","Catalog", new{modelId=m.Id})"
+                                           class="px-3 py-1 text-xs bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+                                            Varyantlar
+                                        </a>
+                                    }
+                                    <form method="post" action="@Url.Action("ToggleModel","Catalog")" class="inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@m.Id"/>
+                                        <input type="hidden" name="brandId" value="@brand?.Id"/>
+                                        <button type="submit" class="px-3 py-1 text-xs border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                            @(m.IsActive ? "Pasif Et" : "Aktif Et")
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

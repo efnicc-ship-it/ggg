@@ -106,6 +106,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, int>, IA
     // Dealer
     public DbSet<Domain.Entities.Dealer.Dealer> Dealers => Set<Domain.Entities.Dealer.Dealer>();
     public DbSet<DealerDevice> DealerDevices => Set<DealerDevice>();
+    public DbSet<DealerBatchShipment> DealerBatchShipments => Set<DealerBatchShipment>();
 
     // Supplier
     public DbSet<Domain.Entities.Supplier.Supplier> Suppliers => Set<Domain.Entities.Supplier.Supplier>();

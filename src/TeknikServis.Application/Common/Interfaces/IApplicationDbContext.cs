@@ -95,6 +95,7 @@ public interface IApplicationDbContext
     // Dealer
     DbSet<Domain.Entities.Dealer.Dealer> Dealers { get; }
     DbSet<DealerDevice> DealerDevices { get; }
+    DbSet<DealerBatchShipment> DealerBatchShipments { get; }
 
     // Supplier
     DbSet<Domain.Entities.Supplier.Supplier> Suppliers { get; }
