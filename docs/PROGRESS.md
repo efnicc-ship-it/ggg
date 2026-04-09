@@ -48,8 +48,10 @@ Son güncelleme: 2026-04-09
 - ✅ AdminController.Index + Admin hub view
 - ✅ StockController.Index redirect
 - ✅ Dashboard AI alert linki düzeltildi
-- ⏳ CommonFault + CommonAction listeleri (admin CRUD)
-- ⏳ IMEI kara liste kontrolü (servis açılırken alert)
+- ✅ CommonFault + CommonAction listeleri (admin CRUD + AJAX)
+- ✅ IMEI kara liste kontrolü (CreateServiceRecordHandler)
+
+## Phase 2 — TAMAMLANDI ✅
 - ⏳ IMEI bazlı geçmiş kontrolü + kara liste kontrolü
 - ⏳ Termal etiket (ZPL) + QR + 9 nokta alan
 - ⏳ SMS + WhatsApp + Email bildirim akışı
@@ -64,9 +66,17 @@ Son güncelleme: 2026-04-09
 
 ---
 
-## Phase 3 — Alış/Satış + Aksesuar ⏳ BAŞLAMADI
+## Phase 3 — Alış/Satış + Aksesuar 🔄 DEVAM EDİYOR
 
-- ⏳ Purchase Module: Normal/Hasarlı/Hurda + intake checklist
+- ✅ Purchase Module: CreatePurchaseCommand handler + controller + views (Index, Create)
+- ✅ Sale Module: CreateSaleCommand handler + controller + views (Index, Create)
+- ⏳ Purchase Detail view + IMEI kontrol sonucu kaydetme
+- ⏳ Alış sözleşmesi PDF (QuestPDF)
+- ⏳ DeviceInventory tam CRUD (Yeni envanter kaydı — alıştan otomatik veya manuel)
+- ⏳ Satış sözleşmesi + online ödeme linki
+- ⏳ Sale Detail view
+- ⏳ Hurda → parça stoğa ekleme akışı
+- ⏳ Public ürün vitrin sayfaları `/u/{slug}`
 - ⏳ IMEI kontrol zorunluluğu + e-devlet PDF upload
 - ⏳ Dijital imza (tablet)
 - ⏳ Alış sözleşmesi (QuestPDF)
